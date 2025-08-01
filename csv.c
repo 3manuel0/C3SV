@@ -23,21 +23,31 @@ csv_data * load_csv_data(char * file_name){
 
     char * csv_in_mem = load_csv_file_to_memory(csv_, file, &size);
     char ch = 0;
-
     size_t k = 0;
     size_t lines = 0;
     size_t current_row_index = 0;
+    csv_->head = malloc(csv_->numcols * sizeof(char *));
+
     for(int i = 0; i < size; i++){
-        if(csv_in_mem[i] == ',' && current_row_index < csv_->numcols){
-            // printf("k = %zu current_row_index = %zu\n", k, csv_->numrows);
-            char * s = malloc((k + 1) * sizeof(char));
-            for(int j = 0; j < k; j++){
-                s[j] = csv_in_mem[i - k + j];
+        if(csv_in_mem[i] == ','){
+            if(current_row_index < csv_->numcols){
+                // printf("k = %zu current_row_index = %zu\n", k, csv_->numrows);
+                char * s = malloc((k + 1) * sizeof(char));
+                for(int j = 0; j < k; j++){
+                    s[j] = csv_in_mem[i - k + j];
+                }
+                printf(" string:%s %zu %zu\n", s, k, current_row_index);
+                csv_->head[current_row_index]= s;
+                current_row_index++;
+                k = 0;
+            }else{
+                char * s = malloc((k + 1) * sizeof(char));
+                for(int j = 0; j < k; j++){
+                    s[j] = csv_in_mem[i - k + j];
+                }
+                parse_param(csv_, s, 0);
+                k = 0;
             }
-            printf(" string:%s %zu\n", s, k);
-            // csv_->head[current_row_index]= s;
-            current_row_index++;
-            k = 0;
         }else{
             k++;
         }
@@ -128,9 +138,9 @@ csv_data * load_csv_data(char * file_name){
     // printf("\n%zu\n", lines);
     printf("printing data............\n");
     printf("[");
-    // for(int i = 0; i < csv_->numrows; i++){
-    //     printf("%s,", csv_->head[i]);
-    // }
+    for(int i = 0; i < csv_->numcols; i++){
+        printf("%s,", csv_->head[i]);
+    }
     printf("]\n");
     return csv_;
     
@@ -145,12 +155,15 @@ int main(){
 
 
 void parse_param(csv_data * csv_, char * param, size_t * current_index){
-    if(*current_index >= csv_->numrows)return;
+    // printf("%s\n", param);
+    // if(*current_index >= csv_->numrows)return;
     size_t c = 0;
     char is_not_numb = 0;
+
     if(param[0] == '-'){
         c++;
     }
+
     while(param[c]){
         if(param[c] > 57 || param[c] < '0'){
             is_not_numb = 1;
@@ -159,7 +172,7 @@ void parse_param(csv_data * csv_, char * param, size_t * current_index){
         c++;
     }
 
-    printf("current_index: %zu csv_->numcols  %zu\n", *current_index, csv_->numrows);
+    // printf("current_index: %zu csv_->numcols  %zu\n", *current_index, csv_->numrows);
 
     if(is_not_numb){
         printf("string : %s\n", param);
@@ -171,9 +184,13 @@ void parse_param(csv_data * csv_, char * param, size_t * current_index){
 }
 
 char * load_csv_file_to_memory(csv_data * csv_, FILE * f, size_t  * len){
+    
     size_t byte_len = *len;
     char * a = malloc(byte_len);
-    assert(a != NULL);
+    if(a == NULL){
+        perror("error in allocation\n");
+        exit(-1);
+    }
     char ch;
     char fline = 0;
     size_t i;
