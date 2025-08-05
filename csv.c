@@ -26,17 +26,18 @@ csv_data * load_csv_data(char * file_name){
     size_t k = 0;
     size_t lines = 0;
     size_t current_row_index = 0;
-    csv_->head = malloc(csv_->numcols * sizeof(char *));
 
+    csv_->head = malloc(csv_->numcols * sizeof(char *));
+    csv_->types = malloc(csv_->numcols * sizeof(data_types));
     for(int i = 0; i < size; i++){
-        if(csv_in_mem[i] == ','){
+        if(csv_in_mem[i] == ',' || i == size - 1){
             if(current_row_index < csv_->numcols){
                 // printf("k = %zu current_row_index = %zu\n", k, csv_->numrows);
                 char * s = malloc((k + 1) * sizeof(char));
                 for(int j = 0; j < k; j++){
                     s[j] = csv_in_mem[i - k + j];
                 }
-                printf(" string:%s %zu %zu\n", s, k, current_row_index);
+                // printf(" string:%s %zu %zu\n", s, k, current_row_index);
                 csv_->head[current_row_index]= s;
                 current_row_index++;
                 k = 0;
@@ -45,8 +46,9 @@ csv_data * load_csv_data(char * file_name){
                 for(int j = 0; j < k; j++){
                     s[j] = csv_in_mem[i - k + j];
                 }
-                parse_param(csv_, s, 0);
+                parse_param(csv_, s, &current_row_index);
                 k = 0;
+                current_row_index++;
             }
         }else{
             k++;
@@ -55,10 +57,10 @@ csv_data * load_csv_data(char * file_name){
     }
 
     printf("number_of_strs: %zu\n", csv_->numrows);
-    rewind(file);
-    ch = 0;                     
-    // csv_->head = malloc(csv_->numrows * sizeof(char *));
-    size_t current_index = 0;
+    // rewind(file);
+    // ch = 0;                     
+
+    // size_t current_index = 0;
 
     // while( ch != '\n' && ch != '\r'){
     //     ch = fgetc(file);
@@ -142,6 +144,12 @@ csv_data * load_csv_data(char * file_name){
         printf("%s,", csv_->head[i]);
     }
     printf("]\n");
+
+    printf("printing types............\n");
+    for(int i = 0; i < csv_->numcols; i++){
+        print_type(csv_->types[i]);
+    }
+
     return csv_;
     
 }
@@ -149,7 +157,7 @@ csv_data * load_csv_data(char * file_name){
 
 
 int main(){
-    load_csv_data("customers-100.csv");
+    load_csv_data("test.csv");
     return 0;
 }
 
@@ -171,13 +179,34 @@ void parse_param(csv_data * csv_, char * param, size_t * current_index){
         }
         c++;
     }
-
+    printf("%d %zu %zu\n", *current_index < (csv_->numcols * 2), *current_index, csv_->numcols * 2);
+    size_t temp = *current_index - csv_->numcols;
+    if(temp < csv_->numcols){
+        if(is_not_numb){
+            csv_->types[temp] = str_;
+        }else{
+            csv_->types[temp] = int_;
+        }
+        // printf("index = %zu\n", ( temp));
+    }
     // printf("current_index: %zu csv_->numcols  %zu\n", *current_index, csv_->numrows);
-
-    if(is_not_numb){
-        printf("string : %s\n", param);
-    }else {
-        printf("numb : %d string: %s\n ", atoi(param), param);
+    if ((*current_index - csv_->numcols) > csv_->numcols - 1) return;
+    switch (csv_->types[temp]) {
+        case str_:
+            printf("string : %s\n", param);
+            break;
+        case float_:
+            printf("string : %s\n", param);
+            break;
+        case int_:
+            printf("int : %d\n ", atoi(param));
+            break;
+        case boolean_:
+            printf("string : %s\n", param);
+            break;
+        default:
+            printf("string : %s\n", param);
+            break;
     }
 
 
@@ -196,7 +225,9 @@ char * load_csv_file_to_memory(csv_data * csv_, FILE * f, size_t  * len){
     size_t i;
     for(i = 0; i < byte_len; i++){
         ch = fgetc(f);
-        if(ch == EOF) break;
+        if(ch == EOF){
+            break;
+        }
         if(ch == '\n' || ch == '\r'){
             fline = 1;
             csv_->numrows++;
@@ -204,14 +235,43 @@ char * load_csv_file_to_memory(csv_data * csv_, FILE * f, size_t  * len){
         if(ch == ',' && !fline){
             csv_->numcols++;
         }
-        while(ch == '\r' || ch == '\n'){
-            if(ch == '\n') a[i] = ',';
-            ch = fgetc(f);
+        // TODO fix this mess
+        while(ch == '\r' || ch == '\n' ){
+            // if(ch == '\n'){
+            //     a[i] = ',';
+            // }
+            ch = ',';
         }
         a[i] = ch;
+        // printf("%c", a[i]);
     }
     *len = i;
     csv_->numcols++;
     printf("numrows:%zu numcols:%zu byte_len: %zu\n", csv_->numrows, csv_->numcols, byte_len);
     return a;
+}
+
+
+void print_type(data_types t){
+    // str_,
+    // float_,
+    // int_,
+    // boolean_
+    switch ((int)t) {
+        case str_:
+            printf("string\n");
+            break;
+        case float_:
+            printf("float\n");
+            break;
+        case int_:
+            printf("int\n");
+            break;
+        case boolean_:
+            printf("boolean \n");
+            break;
+        default:
+            printf("Uknown type\n");
+            break;
+    }
 }

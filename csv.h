@@ -6,7 +6,7 @@
 #include <string.h>
 
 typedef enum{
-    str_,
+    str_ = 1,
     float_,
     int_,
     boolean_
@@ -27,5 +27,7 @@ csv_data * load_csv_data(char * file_name);
 char * load_csv_file_to_memory(csv_data * csv_, FILE * f, size_t  * byte_len);
 
 void parse_param(csv_data * csv_, char * param, size_t * current_index);
+
+void print_type(data_types t);
 
 #endif
