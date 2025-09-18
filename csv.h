@@ -27,7 +27,7 @@ typedef enum{
 typedef struct csv_data{
     char ** head ;
     data_types * types;
-    void *** data;
+    void *** data; 
     size_t numrows;
     size_t numcols;  
 }csv_data;
