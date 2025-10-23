@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 csv_data * load_csv_data(char * file_name){
     FILE * file = fopen(file_name, "rb");
@@ -272,4 +273,31 @@ void print_type(data_types t){
             printf("Uknown type\n");
             break;
     }
+}
+
+
+
+void append_strs(str_t *a, str_t *b){
+    size_t newlen = a->len + b->len;
+    char * temp = malloc(newlen);
+    size_t offst = 0;
+    for(; offst < a->len; offst++){
+        temp[offst] = a->str[offst];
+    }
+    for(size_t i = 0; i < b->len; i++){
+        temp[offst] = b->str[i];
+    }
+    free(b->str);
+    b->len = 0;
+    b = NULL;
+    free(a->str);
+    a->str = temp;
+    a->len = newlen;
+}
+
+str_t str_t_from_const(const char * s){
+    size_t size = strlen(s);
+    char * t = malloc(size);
+    memcpy(t, s, size);
+    return (str_t){t, size};
 }
