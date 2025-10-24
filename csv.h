@@ -42,4 +42,6 @@ str_t str_t_from_const(const char *s);
 
 void print_type(data_types t);
 
+data_types get_type(char *s);
+
 #endif

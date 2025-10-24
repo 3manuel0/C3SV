@@ -156,33 +156,11 @@ csv_data * load_csv_data(char * file_name){
 
 void parse_param(csv_data * csv_, char * param, size_t * current_index){
     printf("current_index : %zu\n", *current_index);
-    if(*current_index >= csv_->numcols)return;
-    size_t c = 0;
-    i8 is_not_numb = 0;
-    data_types type = 0;
-    if(param[0] == '-'){
-        c++;
-    }
-    i32 number_of_points = 0; 
-    while(param[c]){
-        if(param[c] != '.' && (param[c] > '9' || param[c] < '0')){
-            is_not_numb = 1;
-            break;
-        }
-        if(param[c] == '.') number_of_points++;
-        c++;
-    }
-
-    if(number_of_points == 1 && !is_not_numb){
-        type = float_;
-    }else if(number_of_points == 0 && !is_not_numb){
-        type = int_;
-    }else{
-        type = str_;
-    }
-
+    // if(*current_index >= csv_->numcols)return;
+    data_types type = get_type(param);
     printf("%d %zu %zu\n", *current_index < (csv_->numcols * 2), *current_index, csv_->numcols * 2);
     size_t temp = *current_index - csv_->numcols;
+
     if(temp < csv_->numcols){
        
         csv_->types[temp] = type;
@@ -244,6 +222,7 @@ i8 * load_csv_file_to_memory(csv_data * csv_, FILE * f, size_t  * len){
         a[i] = ch;
         // printf("%c", a[i]);
     }
+
     *len = i;
     csv_->numcols++;
     printf("numrows:%zu numcols:%zu byte_len: %zu\n", csv_->numrows, csv_->numcols, byte_len);
@@ -281,15 +260,19 @@ void append_strs(str_t *a, str_t *b){
     size_t newlen = a->len + b->len;
     char * temp = malloc(newlen);
     size_t offst = 0;
+
     for(; offst < a->len; offst++){
         temp[offst] = a->str[offst];
     }
+
     for(size_t i = 0; i < b->len; i++){
         temp[offst] = b->str[i];
     }
+
     free(b->str);
     b->len = 0;
     b = NULL;
+
     free(a->str);
     a->str = temp;
     a->len = newlen;
@@ -300,4 +283,31 @@ str_t str_t_from_const(const char * s){
     char * t = malloc(size);
     memcpy(t, s, size);
     return (str_t){t, size};
+}
+
+data_types get_type(char * s){
+    size_t c = 0;
+    i8 is_not_numb = 0;
+    i32 number_of_points = 0; 
+
+    if(s[0] == '-'){
+        c++;
+    }
+
+    while(s[c]){
+        if(s[c] != '.' && (s[c] > '9' || s[c] < '0')){
+            is_not_numb = 1;
+            break;
+        }
+        if(s[c] == '.') number_of_points++;
+        c++;
+    }
+
+    if(number_of_points == 1 && !is_not_numb){
+        return  float_;
+    }else if(number_of_points == 0 && !is_not_numb){
+        return  int_;
+    }else{
+        return  str_;
+    }
 }
