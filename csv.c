@@ -1,8 +1,5 @@
 #include "csv.h"
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+
 
 csv_data * load_csv_data(char * file_name){
     FILE * file = fopen(file_name, "rb");
@@ -237,19 +234,19 @@ void print_type(data_types t){
     // boolean_
     switch ((int)t) {
         case str_:
-            printf("string\n");
+            puts("string");
             break;
         case float_:
-            printf("float\n");
+            puts("float");
             break;
         case int_:
-            printf("int\n");
+            puts("int");
             break;
         case boolean_:
-            printf("boolean \n");
+            puts("boolean");
             break;
         default:
-            printf("Uknown type\n");
+            puts("Uknown type");
             break;
     }
 }
