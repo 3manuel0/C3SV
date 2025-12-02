@@ -1,13 +1,10 @@
 #ifndef CSV
 #define CSV
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
 
 typedef uint8_t u8;
 typedef uint16_t u16;
@@ -26,8 +23,8 @@ typedef struct {
 } str_t;
 
 typedef union {
-  int i;
-  float f;
+  long int i;
+  double f;
   char *s;
   bool b;
 } data_u;

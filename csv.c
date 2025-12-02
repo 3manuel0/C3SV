@@ -1,6 +1,7 @@
 #include "csv.h"
 
 
+
 csv_data * load_csv_data(char * file_name){
     FILE * file = fopen(file_name, "rb");
 
@@ -27,6 +28,8 @@ csv_data * load_csv_data(char * file_name){
 
     csv_->head = malloc(csv_->numcols * sizeof(char *));
     csv_->types = malloc(csv_->numcols * sizeof(data_types));
+    csv_->data = malloc(csv_->numcols * sizeof(data_u *));
+    csv_->data[0] = malloc(csv_->numcols * sizeof(data_u));
     for(u32 i = 0; i < size; i++){
         if(csv_in_mem[i] == ',' || i == size - 1){
             if(current_row_index < csv_->numcols){
@@ -40,13 +43,33 @@ csv_data * load_csv_data(char * file_name){
                 current_row_index++;
                 k = 0;
             }else{
-                char * s = malloc((k + 1) * sizeof(char));
-                for(u32 j = 0; j < k; j++){
-                    s[j] = csv_in_mem[i - k + j];
+                if(current_row_index < csv_->numcols * 2){
+                    char * s = malloc((k + 1) * sizeof(char));
+                    for(u32 j = 0; j < k; j++){
+                        s[j] = csv_in_mem[i - k + j];
+                    }
+                    int index = current_row_index - csv_->numcols;
+                    s[k] = 0;
+                    data_types d = get_type(s);
+                    csv_->types[current_row_index - csv_->numcols] = d;
+                    printf("type = %d\n", d);
+                    if(d == float_){
+                        csv_->data[0][index].f = strtof(s, NULL);
+                        printf("s = %s, float = %.2lf\n", s, csv_->data[0][index].f);
+                        free(s);
+                    }else                    
+                     if(d == int_){
+                        csv_->data[0][index].i = strtol(s, NULL, 10);
+                        printf("s = %s, int = %ld\n", s, csv_->data[0][index].i);
+                        free(s);
+                    }else
+                     if(d == str_){
+                        csv_->data[0][index].s = s;
+                        printf("s = %s, str = %s\n", s, csv_->data[0][index].s);
+                    }
+                    k = 0;
+                    current_row_index++;
                 }
-                parse_param(csv_, s, &current_row_index);
-                k = 0;
-                current_row_index++;
             }
         }else{
             k++;
