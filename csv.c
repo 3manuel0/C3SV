@@ -1,252 +1,44 @@
-#include "csv.h"
+#include "includes/csv.h"
+#include "includes/lib3man.h"
+#include <stdio.h>
 
+// global arenas
+Arenas arenas = {0};
+Arenas * arenas_head = &arenas;
 
-
-csv_data * load_csv_data(char * file_name){
-    FILE * file = fopen(file_name, "rb");
-
-    if(file == NULL){
+CSV *load_csv(char *file_name){
+    FILE * csv_f = fopen(file_name, "r");
+    
+    arenas = (Arenas){.arena = create_Arena(MiB(5)), .next = NULL};
+    
+    if(csv_f == NULL){
         perror("Can't open file");
         return NULL;
     }
 
-    csv_data * csv_ = malloc(sizeof(csv_data));
+    fseek(csv_f, 0, SEEK_END);
 
-    size_t size;
+    Arena arena = create_Arena(ftell(csv_f) + KiB(2)); 
+    size_t temp_file_size = ftell(csv_f);
+    u8 * csv_mem = arena_Alloc(&arena, temp_file_size);
 
-    fseek(file, 0, SEEK_END);
-
-    size = ftell(file);
-
-    rewind(file);
-
-    i8 * csv_in_mem = load_csv_file_to_memory(csv_, file, &size);
-    // i8 ch = 0;
-    size_t k = 0;
-    // size_t lines = 0;
-    size_t current_row_index = 0;
-
-    csv_->head = malloc(csv_->numcols * sizeof(char *));
-    csv_->types = malloc(csv_->numcols * sizeof(data_types));
-    csv_->data = malloc(csv_->numcols * sizeof(data_u *));
-    csv_->data[0] = malloc(csv_->numcols * sizeof(data_u));
-    for(u32 i = 0; i < size; i++){
-        if(csv_in_mem[i] == ',' || i == size - 1){
-            if(current_row_index < csv_->numcols){
-                // printf("k = %zu current_row_index = %zu\n", k, csv_->numrows);
-                char * s = malloc((k + 1) * sizeof(char));
-                for(u32 j = 0; j < k; j++){
-                    s[j] = csv_in_mem[i - k + j];
-                }
-                // printf(" string:%s %zu %zu\n", s, k, current_row_index);
-                csv_->head[current_row_index]= s;
-                current_row_index++;
-                k = 0;
-            }else{
-                if(current_row_index < csv_->numcols * 2){
-                    char * s = malloc((k + 1) * sizeof(char));
-                    for(u32 j = 0; j < k; j++){
-                        s[j] = csv_in_mem[i - k + j];
-                    }
-                    int index = current_row_index - csv_->numcols;
-                    s[k] = 0;
-                    data_types d = get_type(s);
-                    csv_->types[current_row_index - csv_->numcols] = d;
-                    printf("type = %d\n", d);
-                    if(d == float_){
-                        csv_->data[0][index].f = strtof(s, NULL);
-                        printf("s = %s, float = %.2lf\n", s, csv_->data[0][index].f);
-                        free(s);
-                    }else                    
-                     if(d == int_){
-                        csv_->data[0][index].i = strtol(s, NULL, 10);
-                        printf("s = %s, int = %ld\n", s, csv_->data[0][index].i);
-                        free(s);
-                    }else
-                     if(d == str_){
-                        csv_->data[0][index].s = s;
-                        printf("s = %s, str = %s\n", s, csv_->data[0][index].s);
-                    }
-                    k = 0;
-                    current_row_index++;
-                }
-            }
-        }else{
-            k++;
-        }
-        // printf("%c", csv_in_mem[i]);
-    }
-    free(csv_in_mem);
-    printf("number_of_strs: %zu\n", csv_->numrows);
-    // rewind(file);
-    // ch = 0;                     
-
-    // size_t current_index = 0;
-
-    // while( ch != '\n' && ch != '\r'){
-    //     ch = fgetc(file);
-    //     if(ch == ',' || ch == '\n' || ch == '\r'){
-    //         printf("%c %d", ch, ch);
-    //         char * s = malloc((i + 1) * sizeof(char));
-            
-    //         fseek(file, -i - 1, SEEK_CUR);
-    //         for(int j = 0; j < i; j++){
-    //             ch = fgetc(file);
-    //             s[j] = ch;
-    //         }
-    //         printf(" string:%s %d\n", s,s[0]);
-    //         csv_->head[current_index]= s;
-    //         current_index++;
-    //         i = 0;
-    //         ch = fgetc(file);
-    //         printf("%c %d", ch, ch);
-    //         ch = fgetc(file);
-    //         printf("%c %d", ch, ch);
-
-    //     }else{
-    //         i++;
-    //     }
-        
-    // }
-
-    // size_t current_file_pos = ftell(file);
-    // printf("\nftell : %zu\n", current_file_pos);
-    // int b = current_file_pos + 1;
-    // while(b < size){
-    //     ch = fgetc(file);
-    //     if(ch == '\n'){
-    //         lines++;
-    //     }
-    //     b++;
-    // }
-
-    // printf("ftell : %zu lines: %zu\n", ftell(file), lines);
-    // fseek(file, current_file_pos, SEEK_SET);
-    // printf("ftell : %zu\n", ftell(file));
-    // csv_->numcols = lines;
-    // // csv_->data = malloc(sizeof(void *) * lines);
-    // i = 0;
-    // size_t current_row_index = 0;
-    // size_t current_col_index = 0;
-    // // b = 0;
-    // lines = 0;
-
-    // while(b < size){
-    //     ch = fgetc(file);
-    //     if(ch == '\n' || ch == '\r'){
-    //         lines++;
-    //         current_row_index = 0;
-    //     }
-    //     if(ch == ',' || ch == '\n' || ch == '\r'){
-    //         char * s = calloc((i + 1) , sizeof(char));
-    //         // char s[255] = {0};
-    //         fseek(file, -i - 1, SEEK_CUR);
-    //         for(int j = 0; j < i; j++){
-    //             ch = fgetc(file);
-    //             s[j] = ch;
-    //         }
-    //         // csv_->head[current_index]= s;
-    //         if(i > 0)
-    //             parse_param(csv_, s, &current_row_index);
-    //         free(s);
-    //         current_row_index ++;
-    //         i = 0;
-    //         ch = fgetc(file);
-    //     }else{
-    //         i++;
-    //     }
-    //     // printf(".......................");
-    //     b++;
-    // }
-    // printf("\n%zu\n", lines);
-    printf("printing headear............\n");
-    printf("[");
-    for(u32 i = 0; i < csv_->numcols; i++){
-        printf("%s,", csv_->head[i]);
-    }
-    printf("]\n");
-
-    printf("printing types............\n");
-    for(u32 i = 0; i < csv_->numcols; i++){
-        print_type(csv_->types[i]);
+    if(csv_f == NULL){
+        perror("Error, Allocation Failed");
+        return NULL;
     }
 
-    return csv_;
-}
+    printf("%zu %zu", ftell(csv_f) + KiB(2), ftell(csv_f));
 
-void parse_param(csv_data * csv_, char * param, size_t * current_index){
-    printf("current_index : %zu\n", *current_index);
-    // if(*current_index >= csv_->numcols)return;
-    data_types type = get_type(param);
-    printf("%d %zu %zu\n", *current_index < (csv_->numcols * 2), *current_index, csv_->numcols * 2);
-    size_t temp = *current_index - csv_->numcols;
+    rewind(csv_f);
 
-    if(temp < csv_->numcols){
-       
-        csv_->types[temp] = type;
+    csv_to_memory(csv_mem, csv_f, temp_file_size);
 
-        // printf("index = %zu\n", ( temp));
-    }
-    // printf("current_index: %zu csv_->numcols  %zu\n", *current_index, csv_->numrows);
-    if ((*current_index - csv_->numcols) > csv_->numcols - 1) return;
-    // switch (csv_->types[temp]) {
-    //     case str_:
-    //         printf("string : %s\n", param);
-    //         break;
-    //     case float_:
-    //         printf("string : %s\n", param);
-    //         break;
-    //     case int_:
-    //         printf("int : %d\n ", atoi(param));
-    //         break;
-    //     case boolean_:
-    //         printf("string : %s\n", param);
-    //         break;
-    //     default:
-    //         printf("string : %s\n", param);
-    //         break;
-    // }
-
-    printf("%zu csv_->numrows: %zu\n", *current_index,csv_->numcols); 
-}
-
-i8 * load_csv_file_to_memory(csv_data * csv_, FILE * f, size_t  * len){
-    size_t byte_len = *len;
-    i8 * a = malloc(byte_len);
-    if(a == NULL){
-        perror("error in allocation\n");
-        exit(-1);
-    }
-    i8 ch;
-    i8 fline = 0;
-    size_t i;
-    for(i = 0; i < byte_len; i++){
-        ch = fgetc(f);
-        if(ch == EOF){
-            break;
-        }
-        if(ch == '\n' || ch == '\r'){
-            fline = 1;
-            csv_->numrows++;
-        }
-        if(ch == ',' && !fline){
-            csv_->numcols++;
-        }
-        // TODO fix this mess
-        while(ch == '\r' || ch == '\n' ){
-            // if(ch == '\n'){
-            //     a[i] = ',';
-            // }
-            ch = ',';
-        }
-        a[i] = ch;
-        // printf("%c", a[i]);
+    for(size_t i = 0; i < temp_file_size; i++){
+        printf("%c", csv_mem[i]);
     }
 
-    *len = i;
-    csv_->numcols++;
-    printf("numrows:%zu numcols:%zu byte_len: %zu\n", csv_->numrows, csv_->numcols, byte_len);
-    return a;
+    printf("address = %p\n", arena.address);
+    return NULL;
 }
 
 
@@ -276,7 +68,7 @@ void print_type(data_types t){
 
 
 
-void append_strs(str_t *a, str_t *b){
+void append_strs(string *a, string *b){
     size_t newlen = a->len + b->len;
     char * temp = malloc(newlen);
     size_t offst = 0;
@@ -298,12 +90,6 @@ void append_strs(str_t *a, str_t *b){
     a->len = newlen;
 }
 
-str_t str_t_from_const(const char * s){
-    size_t size = strlen(s);
-    char * t = malloc(size);
-    memcpy(t, s, size);
-    return (str_t){t, size};
-}
 
 data_types get_type(char * s){
     size_t c = 0;
@@ -330,4 +116,13 @@ data_types get_type(char * s){
     }else{
         return  str_;
     }
+}
+
+void csv_to_memory(u8 * mem, FILE * file, size_t size){
+    for(size_t i = 0; i < size; i++){
+        u8 ch = fgetc(file);
+        *mem = ch;
+        mem++;
+    }
+    // printf("address from func = %p\n", mem);
 }

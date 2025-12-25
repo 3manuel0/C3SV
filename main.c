@@ -1,7 +1,8 @@
-#include "csv.h"
+#include "includes/csv.h"
 
 int main(){
-    load_csv_data("test1.csv"); 
+    CSV * csv = load_csv("test1.csv");
+    csv ++;
     return 0;
 }
 
