@@ -8,12 +8,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef enum { str_ = 1, float_, int_, boolean_ } data_types;
+typedef enum { string_ = 1, float64_, int64_, boolean_ } data_types;
 
 typedef struct {
   string *head;
   data_types *types;
-  void **data;
+  string **data;
   size_t numrows;
   size_t numcols;
   ArenaList *gl_arena;
@@ -27,7 +27,11 @@ CSV *create_csv();
 void csv_to_memory(u8 *mem, FILE *file, size_t size, size_t *numrows,
                    size_t *numcolumns);
 
-int csv_create_header(CSV *csv, u8 *mem);
+int csv_parce_head(CSV *csv, u8 *mem);
+
+u8 *csv_parce_line(ArenaList *arena, string *csv_line, u8 *mem);
+
+int csv_parse(CSV *csv, u8 *mem);
 
 void print_type(data_types t);
 
