@@ -16,16 +16,24 @@ typedef struct {
   void **data;
   size_t numrows;
   size_t numcols;
+  ArenaList *gl_arena;
+  ArenaList *gl_arena_head;
 } CSV;
 
 CSV *load_csv(char *file_name);
 
+CSV *create_csv();
+
 void csv_to_memory(u8 *mem, FILE *file, size_t size, size_t *numrows,
                    size_t *numcolumns);
 
-int create_csv_header(Arenas *arenas, CSV *csv, u8 *mem);
+int csv_create_header(CSV *csv, u8 *mem);
 
 void print_type(data_types t);
+
+void csv_print_head(CSV *csv);
+
+void csv_free(CSV *csv);
 
 data_types get_type(char *s);
 

@@ -29,20 +29,20 @@ typedef struct {
   size_t cur_size;
 } Arena;
 
-// for multiple arenas (linked list of arenas)
-typedef struct Arenas {
+// for multiple ArenaList (linked list of ArenaList)
+typedef struct ArenaList {
   Arena arena;
-  struct Arenas *next;
-} Arenas;
+  struct ArenaList *next;
+} ArenaList;
 
 Arena create_Arena(size_t arena_size);
 void *arena_Alloc(Arena *arena, size_t size);
 void arena_reset(Arena *arena);
 void arena_free(Arena *arena);
 
-// for multiple arenas (linked list of arenas)
-void *arenas_Alloc(Arenas *arenas, size_t size);
-void arenas_free(Arenas *head);
+// for multiple Arenas (linked list of ArenaList)
+void *arenaList_Alloc(ArenaList *arenalist, size_t size);
+void arenaList_free(ArenaList *head);
 
 // end of arena allocator #####################################################
 
