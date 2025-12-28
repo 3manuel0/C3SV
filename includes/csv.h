@@ -29,16 +29,18 @@ void csv_to_memory(u8 *mem, FILE *file, size_t size, size_t *numrows,
 
 int csv_parce_head(CSV *csv, u8 *mem);
 
-u8 *csv_parce_line(ArenaList *arena, string *csv_line, u8 *mem);
+u8 *csv_parce_column(ArenaList *arena, string *csv_column, u8 *mem);
 
 int csv_parse(CSV *csv, u8 *mem);
-
-void print_type(data_types t);
-
-void csv_print_head(CSV *csv);
 
 void csv_free(CSV *csv);
 
 data_types get_type(char *s);
+
+void csv_print_head(CSV *csv);
+
+void csv_print_column(string *column, size_t numrows);
+
+void print_type(data_types t);
 
 #endif

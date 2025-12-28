@@ -3,16 +3,6 @@
 #include <assert.h>
 
 
-void csv_print_line(string * line, size_t numrows){
-    write(1, "[", 1);
-    for(size_t i = 0; i < numrows; i++){
-        string_print(line[i]);
-        if(i < numrows - 1)
-            write(1, ", ", 2);
-    }
-    write(1, "]", 1);
-    write(1, "\n", 1);
-}
 
 CSV *load_csv(char *file_name){
     FILE * csv_f = fopen(file_name, "r");
@@ -59,8 +49,6 @@ CSV *load_csv(char *file_name){
     csv_parse(csv, csv_mem);
     printf("string: ");
     string_print(*(string *)&csv->data[0]);
-    for(size_t i = 0; i < csv->numcols; i++)
-        csv_print_line(csv->data[i], csv->numrows);
     return csv;
 }
 
@@ -176,20 +164,13 @@ int csv_parce_head(CSV *csv, u8 *mem){
     csv->head = arenaList_Alloc(csv->gl_arena, sizeof(string) * csv->numrows);
     printf("numrows = %zu | numcols = %zu\n", csv->numrows, csv->numcols);
     assert(csv->numcols > 0);
-    csv_parce_line(csv->gl_arena, csv->head, mem);
+    csv_parce_column(csv->gl_arena, csv->head, mem);
     // string_println(csv->head[i]);
     return 0;
 }
 
 void csv_print_head(CSV *csv){
-    write(1, "[", 1);
-    for(size_t i = 0; i < csv->numrows; i++){
-        string_print(csv->head[i]);
-        if(i < csv->numrows - 1)
-            write(1, ", ", 2);
-    }
-    write(1, "]", 1);
-    write(1, "\n", 1);
+    csv_print_column(csv->head, csv->numrows);
 }
 
 void csv_free(CSV *csv){
@@ -197,7 +178,7 @@ void csv_free(CSV *csv){
     free(csv);
 }
 
-u8 *csv_parce_line(ArenaList *arena, string *csv_line, u8 *mem){
+u8 *csv_parce_column(ArenaList *arena, string *csv_column, u8 *mem){
     size_t count = 0;
     size_t current_row = 0;
     int i = 0;
@@ -205,10 +186,11 @@ u8 *csv_parce_line(ArenaList *arena, string *csv_line, u8 *mem){
         if(mem[i] == ','){
             // printf("%c %zu %c\n" , mem[i], count, mem[i - count]);
             // csv->head[current_row] = arenaList_Alloc(arenas, sizeof(string));
-            csv_line[current_row].str = arenaList_Alloc(arena, count);
-            csv_line[current_row].len = count;
-            memcpy(csv_line[current_row].str, &mem[i - count], count);
-            // string_print(csv_line[current_row]);
+            csv_column[current_row].str = arenaList_Alloc(arena, count);
+            csv_column[current_row].len = count;
+            memcpy(csv_column[current_row].str, &mem[i - count], count);
+            // string_print(csv_column[current_row]);
+            printf("len: %zu\n", csv_column[current_row].len );
             count = 0;
             current_row++;
         }else{
@@ -216,25 +198,34 @@ u8 *csv_parce_line(ArenaList *arena, string *csv_line, u8 *mem){
         }
     }
     // add the last row that's before the \n
-    csv_line[current_row].str = arenaList_Alloc(arena, count);
-    csv_line[current_row].len = count;
-    memcpy(csv_line[current_row].str, &mem[i - count], count);
+    csv_column[current_row].str = arenaList_Alloc(arena, count);
+    csv_column[current_row].len = count;
+    memcpy(csv_column[current_row].str, &mem[i - count], count);
     i++;
     return &mem[i];
 }
 
 int csv_parse(CSV *csv, u8 *mem){
     while(*(mem++) != '\n');
-    printf("string : %s %d %c\n", mem, *mem, *mem);
     csv->data = arenaList_Alloc(csv->gl_arena, sizeof(string **) * csv->numcols);
     for(size_t i = 0; i < csv->numcols; i++){
-        // TODO : Fix this mess
-        csv->data[i] = arenaList_Alloc(csv->gl_arena, sizeof(string*) * csv->numrows);
-        mem = csv_parce_line(csv->gl_arena, csv->data[i], mem);
-        printf("########## arena_size:%zu max:%zu\n", csv->gl_arena->arena.cur_size, csv->gl_arena->arena.capacity);
+        csv->data[i] = arenaList_Alloc(csv->gl_arena, sizeof(string) * csv->numrows);
+        mem = csv_parce_column(csv->gl_arena, csv->data[i], mem);
+        // printf("########## arena_size:%zu max:%zu\n", csv->gl_arena->arena.cur_size, csv->gl_arena->arena.capacity);
         // string_println(csv->data[i][0]);
-        printf("%s %s\n", mem ,csv->data[i][0].str);
-        printf("##########\n");
+        // // printf("%s %s\n", mem ,csv->data[i][0].str);
+        // printf("##########\n");
     }
     return 0;
+}
+
+
+void csv_print_column(string * column, size_t numrows){
+    write(1, "[ ", 2);
+    for(size_t i = 0; i < numrows; i++){
+        string_print(column[i]);
+        if(i < numrows - 1)
+            write(1, ", ", 2);
+    }
+    write(1, " ]\n", 3);
 }
