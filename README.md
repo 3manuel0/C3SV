@@ -5,7 +5,7 @@
 
 ### About
 
-is a C library for parsing csv files, that I'm working on, I had to rewrite it because I didn't start in a good way, and I now have [Lib3man](https://github.com/3manuel0/lib3man) to help me simplify things and make my work easier.
+C3SV is C library for parsing csv files that I'm working on. I had to start over because I didn’t have an optimal start, but now I have [Lib3man](https://github.com/3manuel0/lib3man)(my C library) to help me simplify things and make my work easier.
 
 ### Goals
 
