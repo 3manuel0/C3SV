@@ -24,12 +24,12 @@ CSV *load_csv(char *file_name);
 
 CSV *create_csv();
 
-void csv_to_memory(u8 *mem, FILE *file, size_t size, size_t *numrows,
-                   size_t *numcolumns);
+void csv_to_memory(u8 *mem, FILE *file, size_t size, size_t *numcolumns,
+                   size_t *numrows);
 
 int csv_parce_head(CSV *csv, u8 *mem);
 
-u8 *csv_parce_column(ArenaList *arena, string *csv_column, u8 *mem);
+u8 *csv_parce_row(ArenaList *arena, string *csv_row, u8 *mem);
 
 int csv_parse(CSV *csv, u8 *mem);
 
@@ -39,7 +39,7 @@ data_types get_type(char *s);
 
 void csv_print_head(CSV *csv);
 
-void csv_print_column(string *column, size_t numrows);
+void csv_print_row(string *row, size_t numcolumns);
 
 void print_type(data_types t);
 
