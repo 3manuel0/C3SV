@@ -1,7 +1,6 @@
 #ifndef CSV_H
 #define CSV_H
 #include "lib3man.h"
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -40,6 +39,10 @@ data_types get_type(char *s);
 void csv_print_head(CSV *csv);
 
 void csv_print_row(string *row, size_t numcolumns);
+
+void csv_print_column_from_string(CSV *csv, string column_name);
+
+size_t csv_get_column_index(CSV *csv, string name, int *is_failed);
 
 void print_type(data_types t);
 

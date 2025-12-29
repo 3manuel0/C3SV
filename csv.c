@@ -1,8 +1,6 @@
 #include "includes/csv.h"
 #include "includes/lib3man.h"
 #include <assert.h>
-#include <stdio.h>
-
 
 
 CSV *load_csv(char *file_name){
@@ -222,7 +220,6 @@ int csv_parse(CSV *csv, u8 *mem){
 
 
 void csv_print_row(string * row, size_t numcolumn){
-    printf("cols %zu\n", numcolumn );
     write(1, "[ ", 2);
     for(size_t i = 0; i < numcolumn; i++){
         string_print(row[i]);
@@ -230,4 +227,30 @@ void csv_print_row(string * row, size_t numcolumn){
             write(1, ", ", 2);
     }
     write(1, " ]\n", 3);
+}
+
+void csv_print_column_from_string(CSV *csv, string column_name){
+    int is_failed = 0;
+    size_t index = csv_get_column_index(csv, column_name, &is_failed);
+    if(is_failed){
+        fprintf(stderr, "column not found\n");
+        return;
+    }
+    write(1, "[ ", 2);
+    for(size_t i = 0; i < csv->numrows; i++){
+        string_print(csv->data[i][index]);
+        if(i < csv->numrows - 1)
+            write(1, ", ", 2);
+    }
+    write(1, " ]\n", 3);
+}
+
+size_t csv_get_column_index(CSV *csv, string name, int *is_failed){
+    for(size_t i = 0; i < csv->numcols; i++){
+        if(string_cmp(&name, &csv->head[i])){
+            return i;
+        }
+    }
+    *is_failed = true;
+    return 0;
 }
