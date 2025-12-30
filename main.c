@@ -6,7 +6,7 @@
 int main(){
     CSV *csv = load_csv("customers-100.csv");
     // CSV *csv = load_csv("test.csv");
-    if(csv == NULL) return 1;
+    if(csv == NULL)return 1;
     // free_csv(csv);
     csv_print_head(csv);
     // csv_print_row(csv->data[5], csv->numcols);

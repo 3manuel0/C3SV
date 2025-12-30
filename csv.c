@@ -6,14 +6,14 @@ CSV *load_csv(char *file_name){
     FILE * csv_f = fopen(file_name, "r");
 
     if(csv_f == NULL){
-        perror("Can't open file");
+        fprintf(stderr, "Error, Can't open file or wrong path!");
         return NULL;
     }
 
     CSV * csv = create_csv();
 
     if(csv == NULL){
-        perror("csv creation failed, problem allocating memory");
+        fprintf(stderr, "Error, csv Object Allocation Failed!");
         return NULL;
     }
 
@@ -23,7 +23,7 @@ CSV *load_csv(char *file_name){
     u8 * csv_mem = calloc(temp_file_size + KiB(2), sizeof(u8));
 
     if(csv_mem == NULL){
-        perror("Error, Allocation Failed");
+        fprintf(stderr, "Error, Memory Allocation Failed");
         return NULL;
     }
 
@@ -33,7 +33,11 @@ CSV *load_csv(char *file_name){
     // columns left -> right
     // rows top -> bottom
     csv_to_memory(csv_mem, csv_f, temp_file_size, &csv->numcols, &csv->numrows);
-
+    if(csv->numcols == 0 || csv->numrows == 0){
+        perror("Error, csv Parcing Failed!");
+        return NULL;
+    }
+    
     if(csv_parce_head(csv, csv_mem)){
         return  NULL;
     }
@@ -246,7 +250,7 @@ void csv_print_column_from_string(CSV *csv, string column_name){
     }
     write(1, "[ ", 2);
     for(size_t i = 0; i < csv->numrows; i++){
-        string_print(csv->data[i][index]);
+        string_print((*(string**)&csv->data[i])[index]);
         if(i < csv->numrows - 1)
             write(1, ", ", 2);
     }

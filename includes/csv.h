@@ -12,7 +12,7 @@ typedef enum { string_ = 1, float64_, int64_, boolean_ } data_types;
 typedef struct {
   string *head;
   data_types *types;
-  string **data;
+  void **data; // maybe void * is better for infering the types later
   size_t numrows;
   size_t numcols;
   ArenaList *gl_arena;
