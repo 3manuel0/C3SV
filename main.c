@@ -1,15 +1,20 @@
 #include "includes/csv.h"
 #include "includes/lib3man.h"
+#include <stddef.h>
+#include <stdio.h>
 
 int main(){
-    CSV *csv = load_csv("test2.csv");
+    CSV *csv = load_csv("customers-100.csv");
+    // CSV *csv = load_csv("test.csv");
     if(csv == NULL) return 1;
     // free_csv(csv);
     csv_print_head(csv);
-    csv_print_row(csv->data[5], csv->numcols);
-    csv_print_row(csv->data[0], csv->numcols);
-    printf("%zu \n", sizeof(CSV));
-    string to_look_for = string_from_lit("country");
+    // csv_print_row(csv->data[5], csv->numcols);
+    for(size_t i = 0; i < csv->numrows; i++){
+        csv_print_row(csv->data[i], csv->numcols);
+    }
+    printf("numcols: %zu  %zu\n", csv->numcols, csv->numrows);
+    string to_look_for = string_from_lit("Website");
     csv_print_column_from_string(csv , to_look_for);
     csv_free(csv);
     return 0;

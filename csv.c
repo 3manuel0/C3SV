@@ -2,7 +2,6 @@
 #include "includes/lib3man.h"
 #include <assert.h>
 
-
 CSV *load_csv(char *file_name){
     FILE * csv_f = fopen(file_name, "r");
 
@@ -46,7 +45,7 @@ CSV *load_csv(char *file_name){
         // }
     // printf("%zu\n", csv->numrow);
     csv_parse(csv, csv_mem);
-    printf("string: ");
+    // printf("string: ");
     string_print(*(string *)&csv->data[0]);
     return csv;
 }
@@ -132,6 +131,10 @@ void csv_to_memory(u8 *mem, FILE *file, size_t size, size_t *numcolumn, size_t *
     u8 is_next_line = 0;
     for(size_t i = 0; i < size; i++){
         u8 ch = fgetc(file);
+        if(ch == '\r'){
+            ch = fgetc(file);
+            size--;
+        }
         if(is_next_line == 0){
             if(ch == ',' || ch == '\n') (*numcolumn)++;
         }
@@ -144,7 +147,7 @@ void csv_to_memory(u8 *mem, FILE *file, size_t size, size_t *numcolumn, size_t *
     }
     (*numrows)--;
     if(*(--mem) != '\n' && *mem != '\n')(*numrows)++; 
-    printf("%c %d\n", *(mem-1), *(mem-1));
+    printf("%c %d\n", *(mem), *(mem));
 }
 
 CSV *create_csv(){
@@ -180,16 +183,22 @@ void csv_free(CSV *csv){
 u8 *csv_parce_row(ArenaList *arena, string *csv_row, u8 *mem){
     size_t count = 0;
     size_t current_column = 0;
+    u8 is_quotes = false; // checking if test in quotations to not split using the ,
     int i = 0;
     for(; mem[i] != '\n' && mem[i] != 0; i++){
-        if(mem[i] == ','){
+        if(mem[i] == '"' && is_quotes){
+            is_quotes = false;
+        }else if(mem[i] == '"'){
+            is_quotes = true;
+        }
+        if(mem[i] == ',' && !is_quotes){
             // printf("%c %zu %c\n" , mem[i], count, mem[i - count]);
             // csv->head[current_column] = arenaList_Alloc(arenas, sizeof(string));
             csv_row[current_column].str = arenaList_Alloc(arena, count);
             csv_row[current_column].len = count;
             memcpy(csv_row[current_column].str, &mem[i - count], count);
             // string_print(csv_row[current_column]);
-            printf("len: %zu\n", csv_row[current_column].len );
+            // printf("len: %zu\n", csv_row[current_column].len );
             count = 0;
             current_column++;
         }else{
@@ -218,13 +227,12 @@ int csv_parse(CSV *csv, u8 *mem){
     return 0;
 }
 
-
 void csv_print_row(string * row, size_t numcolumn){
     write(1, "[ ", 2);
     for(size_t i = 0; i < numcolumn; i++){
         string_print(row[i]);
         if(i < numcolumn - 1)
-            write(1, ", ", 2);
+            write(1, "| ", 2);
     }
     write(1, " ]\n", 3);
 }
