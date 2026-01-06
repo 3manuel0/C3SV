@@ -14,7 +14,7 @@ int main(){
         csv_print_row(csv->data[i], csv->numcols);
     }
     printf("numcols: %zu  %zu\n", csv->numcols, csv->numrows);
-    string to_look_for = string_from_lit("Website");
+    string to_look_for = string_from_lit("Last Name");
     csv_print_column_from_string(csv , to_look_for);
     csv_free(csv);
     return 0;

@@ -2,6 +2,8 @@
 #include "includes/lib3man.h"
 #include <assert.h>
 
+// TODO: rewrite to use latest version of lib3man
+
 CSV *load_csv(char *file_name){
     FILE * csv_f = fopen(file_name, "r");
 
@@ -236,7 +238,7 @@ void csv_print_row(string * row, size_t numcolumn){
     for(size_t i = 0; i < numcolumn; i++){
         string_print(row[i]);
         if(i < numcolumn - 1)
-            write(1, "| ", 2);
+            write(1, ", ", 2);
     }
     write(1, " ]\n", 3);
 }
