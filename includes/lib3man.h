@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
+#include <assert.h>
 
 typedef uint8_t u8;
 typedef uint16_t u16;
@@ -38,13 +38,14 @@ typedef struct ArenaList {
 } ArenaList;
 
 Arena create_Arena(size_t arena_size);
-void *arena_Alloc(Arena *arena, size_t size);
-void arena_reset(Arena *arena);
+void *arena_Alloc(Arena *arena, size_t size); // reserves a size inside the arena and returns a pointer to the start of it
+void arena_reset(Arena *arena); // resets the arena (!!!data inside the arena can be overwritten)
 void arena_free(Arena *arena);
 
 // for multiple Arenas (linked list of Arenas)
 ArenaList *create_ArenaList(size_t size);
-void *arenaList_Alloc(ArenaList *arenalist, size_t size);
+void *arenaList_Alloc(ArenaList *arenalist, size_t size);// reserves a size inside the arenaList and returns a pointer to the start of it
+void *arenaList_Realloc(ArenaList * arenaList, void *p, size_t oldsz , size_t newsz); 
 void arenaList_free(ArenaList *head);
 // #############################################################################
 
@@ -89,49 +90,68 @@ void arenaList_free(ArenaList *head);
   } // #
 // #############################################################################
 
-// ############ linked list ####################################################
-/* just testing, should make it dynamicly typed maybe I will
-use (void *) or macros like the dynamic array */
-typedef struct list {
-  int data;
-  struct list *next;
-} list;
-
-void list_push(list *node, int value);
-
-void print_list(list *head);
-
-void free_list(list *head);
-
-// #############################################################################
-
-// ############ Length-Based String ############################################
+// ############ Length-Based string and dynamicly allocated string #############
 typedef struct {
   char *str;
   size_t len;
-} string;
+} string_view;
 
-// TODO: string inside areanaList
+typedef struct {
+  char *str;
+  size_t len;
+  size_t cap;
+} string_buffer;
+
+typedef string_view sv;
+typedef string_buffer sb;
 
 enum { str_fail = -1, str_succ, str_err };
 
-#define string_from_lit(str) (string){str, sizeof(str) - 1}
+#define sv_from_lit(str) (sv){str, sizeof(str) - 1}
 
-string string_from_buffer(const char *s);
+// string-view functions ###############################################
+sv sv_from_cstr_sz(const char *str, size_t size);// creating a string view from char * + size
 
-int string_append(string *a, string *b);
+sv sv_from_cstr(const char *str);// creating a string view from char *
 
-string string_append_arena(Arena *arena, string *a, string *b);
+sv sv_from_sb(const sb *sb);// string view from string buffer (a view to that string buffer)
 
-string arena_string_from_mem(Arena *arena, char *str);
+int sv_cmp(const sv *sv1, const sv *sv2); // compare 2 string-views
 
-int string_cmp(const string *s1, const string *s2); // compare 2 strings
+void sv_println(const sv *sv); // prints sdtring-view with new line(\n)
 
-void string_println(string s); // prints the string with new line(\n)
+void sv_print(const sv *sv); // prints sdtring-view  without new line
 
-void string_print(string s); // prints the string without new line
+// string_buffer functions ###########################################################
+sb sb_from_cstr(const char *str);// creating a string-buffer from char *
 
-void string_free(string *s);
-// ##############################################################################
+sb create_sb_inside_arenaList(ArenaList *arenaList, size_t cap);
+
+sb sb_arenaList_from_cstr_sz(ArenaList *arenaList, const char *str, size_t size); // creating a string-buffer from char * with it's size inside an areanaList
+
+int sb_arenaList_push_cstr_sz(ArenaList *arenaList, sb *sb, const char *str, size_t size);
+
+int sb_arenaList_push_sv(ArenaList *arenaList, sb *sb, sv sv);
+
+sb *sb_cat(sb *dest, sb *src); // concatanate two string-buffers in the heap
+
+sb sb_from_sv(const sv *sv); // creates a string-buffer from a string view in the heap
+
+int sb_push_sv(sb *sb, const sv *sv); // append (push) a string-view inside a string-buffer
+
+int sb_push_cstr(sb *sb, const char *str);// append (push) a char * inside a string-buffer
+
+int sb_push_cstr_sz(sb *sb, const char *str, size_t size);// append (push) a char * (with its size) inside a string-buffer
+
+int sb_push_char(sb *sb, char ch);// append (push) a charachter inside a string-buffer
+
+char * cstr_from_sb(const sb *sb);// char * with /0 at the end from string_buffer
+
+void sb_println(const sb *sb); // prints a string-buffer (current used bytes (chars)) with new line(\n)
+
+void sb_print(const sb *sb); // prints a string-buffer without new line
+
+void sb_free(sb *sb); // frees string-buffer in the heap
+// ###########################################################################################
 
 #endif

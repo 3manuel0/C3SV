@@ -10,7 +10,7 @@
 typedef enum { string_ = 1, float64_, int64_, boolean_ } data_types;
 
 typedef struct {
-  string *head;
+  sv *head;
   data_types *types;
   void **data; // maybe void * is better for infering the types later
   size_t numrows;
@@ -28,7 +28,7 @@ void csv_to_memory(u8 *mem, FILE *file, size_t size, size_t *numcolumns,
 
 int csv_parce_head(CSV *csv, u8 *mem);
 
-u8 *csv_parce_row(ArenaList *arena, string *csv_row, u8 *mem);
+u8 *csv_parce_row(ArenaList *arena, sv *csv_row, u8 *mem);
 
 int csv_parse(CSV *csv, u8 *mem);
 
@@ -38,11 +38,11 @@ data_types get_type(char *s);
 
 void csv_print_head(CSV *csv);
 
-void csv_print_row(string *row, size_t numcolumns);
+void csv_print_row(sv *row, size_t numcolumns);
 
-void csv_print_column_from_string(CSV *csv, string column_name);
+void csv_print_column_from_string(CSV *csv, sv column_name);
 
-size_t csv_get_column_index(CSV *csv, string name, int *is_failed);
+size_t csv_get_column_index(CSV *csv, sv name, int *is_failed);
 
 void print_type(data_types t);
 

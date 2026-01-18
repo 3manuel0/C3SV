@@ -1,6 +1,7 @@
 #include "includes/csv.h"
 #include "includes/lib3man.h"
 #include <assert.h>
+#include <stdio.h>
 
 // TODO: rewrite to use latest version of lib3man
 
@@ -29,7 +30,7 @@ CSV *load_csv(char *file_name){
         return NULL;
     }
 
-    printf("%zu %zu\n", ftell(csv_f) + KiB(2), ftell(csv_f));
+    printf("size + 2kib=%zu size=%zu\n", ftell(csv_f) + KiB(2), ftell(csv_f));
 
     rewind(csv_f);
     // columns left -> right
@@ -52,7 +53,7 @@ CSV *load_csv(char *file_name){
     // printf("%zu\n", csv->numrow);
     csv_parse(csv, csv_mem);
     // printf("string: ");
-    string_print(*(string *)&csv->data[0]);
+    sv_print((string_view *)csv->data[0]);
     return csv;
 }
 
@@ -80,31 +81,6 @@ void print_type(data_types t){
             break;
     }
 }
-
-
-
-void append_strs(string *a, string *b){
-    size_t newlen = a->len + b->len;
-    char * temp = malloc(newlen);
-    size_t offst = 0;
-
-    for(; offst < a->len; offst++){
-        temp[offst] = a->str[offst];
-    }
-
-    for(size_t i = 0; i < b->len; i++){
-        temp[offst] = b->str[i];
-    }
-
-    free(b->str);
-    b->len = 0;
-    b = NULL;
-
-    free(a->str);
-    a->str = temp;
-    a->len = newlen;
-}
-
 
 data_types get_type(char * s){
     size_t c = 0;
@@ -153,7 +129,7 @@ void csv_to_memory(u8 *mem, FILE *file, size_t size, size_t *numcolumn, size_t *
     }
     (*numrows)--;
     if(*(--mem) != '\n' && *mem != '\n')(*numrows)++; 
-    printf("%c %d\n", *(mem), *(mem));
+    // printf("%c %d\n", *(mem), *(mem));
 }
 
 CSV *create_csv(){
@@ -169,7 +145,7 @@ CSV *create_csv(){
 
 
 int csv_parce_head(CSV *csv, u8 *mem){
-    csv->head = arenaList_Alloc(csv->gl_arena, sizeof(string) * csv->numcols);
+    csv->head = arenaList_Alloc(csv->gl_arena, sizeof(sv) * csv->numcols);
     printf("numcolumn = %zu | numrow = %zu\n", csv->numcols, csv->numrows);
     assert(csv->numrows > 0);
     csv_parce_row(csv->gl_arena, csv->head, mem);
@@ -186,7 +162,7 @@ void csv_free(CSV *csv){
     free(csv);
 }
 
-u8 *csv_parce_row(ArenaList *arena, string *csv_row, u8 *mem){
+u8 *csv_parce_row(ArenaList *arena, sv *csv_row, u8 *mem){
     size_t count = 0;
     size_t current_column = 0;
     u8 is_quotes = false; // checking if test in quotations to not split using the ,
@@ -221,9 +197,9 @@ u8 *csv_parce_row(ArenaList *arena, string *csv_row, u8 *mem){
 
 int csv_parse(CSV *csv, u8 *mem){
     while(*(mem++) != '\n');
-    csv->data = arenaList_Alloc(csv->gl_arena, sizeof(string **) * csv->numrows);
+    csv->data = arenaList_Alloc(csv->gl_arena, sizeof(sv **) * csv->numrows);
     for(size_t i = 0; i < csv->numrows; i++){
-        csv->data[i] = arenaList_Alloc(csv->gl_arena, sizeof(string) * csv->numcols);
+        csv->data[i] = arenaList_Alloc(csv->gl_arena, sizeof(sv) * csv->numcols);
         mem = csv_parce_row(csv->gl_arena, csv->data[i], mem);
         // printf("########## arena_size:%zu max:%zu\n", csv->gl_arena->arena.cur_size, csv->gl_arena->arena.capacity);
         // string_println(csv->data[i][0]);
@@ -233,35 +209,42 @@ int csv_parse(CSV *csv, u8 *mem){
     return 0;
 }
 
-void csv_print_row(string * row, size_t numcolumn){
-    write(1, "[ ", 2);
+void csv_print_row(sv * row, size_t numcolumn){
+    // fwrite(1, "[ ", 2);
+    fwrite("[ ", 1, 2, stdout);
     for(size_t i = 0; i < numcolumn; i++){
-        string_print(row[i]);
+        sv_print(&row[i]);
         if(i < numcolumn - 1)
-            write(1, ", ", 2);
+            // write(1, ", ", 2);
+            fwrite(", ", 1, 2, stdout);
+
     }
-    write(1, " ]\n", 3);
+    // fwrite(1, " ]\n", 3);
+    fwrite(" ]\n", 1, 3, stdout);
 }
 
-void csv_print_column_from_string(CSV *csv, string column_name){
+void csv_print_column_from_string(CSV *csv, sv column_name){
     int is_failed = 0;
     size_t index = csv_get_column_index(csv, column_name, &is_failed);
     if(is_failed){
         fprintf(stderr, "column not found\n");
         return;
     }
-    write(1, "[ ", 2);
+    // write(1, "[ ", 2);
+    fwrite("[ ", 1, 2, stdout);
     for(size_t i = 0; i < csv->numrows; i++){
-        string_print((*(string**)&csv->data[i])[index]);
+        sv_print(&((sv **)csv->data)[i][index]);
         if(i < csv->numrows - 1)
-            write(1, ", ", 2);
+            // write(1, ", ", 2);
+            fwrite(", ", 1, 2, stdout);
     }
-    write(1, " ]\n", 3);
+    // write(1, " ]\n", 3);
+    fwrite(" ]\n", 1, 3, stdout);
 }
 
-size_t csv_get_column_index(CSV *csv, string name, int *is_failed){
+size_t csv_get_column_index(CSV *csv, sv name, int *is_failed){
     for(size_t i = 0; i < csv->numcols; i++){
-        if(string_cmp(&name, &csv->head[i])){
+        if(sv_cmp(&name, &csv->head[i])){
             return i;
         }
     }
