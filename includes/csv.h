@@ -1,11 +1,6 @@
 #ifndef CSV_H
 #define CSV_H
 #include "lib3man.h"
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 typedef enum { string_ = 1, float64_, int64_, boolean_ } data_types;
 
@@ -26,9 +21,9 @@ CSV *create_csv();
 void csv_to_memory(u8 *mem, FILE *file, size_t size, size_t *numcolumns,
                    size_t *numrows);
 
-int csv_parce_head(CSV *csv, u8 *mem);
+int csv_parse_head(CSV *csv, u8 *mem);
 
-u8 *csv_parce_row(ArenaList *arena, sv *csv_row, u8 *mem);
+u8 *csv_parse_row(ArenaList *arena, sv *csv_row, u8 *mem);
 
 int csv_parse(CSV *csv, u8 *mem);
 

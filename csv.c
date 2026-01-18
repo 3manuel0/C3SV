@@ -1,9 +1,7 @@
 #include "includes/csv.h"
 #include "includes/lib3man.h"
-#include <assert.h>
-#include <stdio.h>
 
-// TODO: rewrite to use latest version of lib3man
+// TODO: change from sv to sb, also parse csv with types
 
 CSV *load_csv(char *file_name){
     FILE * csv_f = fopen(file_name, "r");
@@ -41,7 +39,7 @@ CSV *load_csv(char *file_name){
         return NULL;
     }
     
-    if(csv_parce_head(csv, csv_mem)){
+    if(csv_parse_head(csv, csv_mem)){
         return  NULL;
     }
 
@@ -56,7 +54,6 @@ CSV *load_csv(char *file_name){
     sv_print((string_view *)csv->data[0]);
     return csv;
 }
-
 
 void print_type(data_types t){
     // str_,
@@ -135,7 +132,7 @@ void csv_to_memory(u8 *mem, FILE *file, size_t size, size_t *numcolumn, size_t *
 CSV *create_csv(){
     CSV * csv = malloc(sizeof(CSV));
     if(csv == NULL) return NULL;
-    csv->gl_arena = create_ArenaList(MiB(5));
+    csv->gl_arena = create_ArenaList(MiB(250));
     if(csv->gl_arena == NULL) return NULL;
     if(csv->gl_arena->arena.memory == NULL) return NULL;
     csv->gl_arena->next = NULL;
@@ -144,11 +141,11 @@ CSV *create_csv(){
 }
 
 
-int csv_parce_head(CSV *csv, u8 *mem){
+int csv_parse_head(CSV *csv, u8 *mem){
     csv->head = arenaList_Alloc(csv->gl_arena, sizeof(sv) * csv->numcols);
     printf("numcolumn = %zu | numrow = %zu\n", csv->numcols, csv->numrows);
     assert(csv->numrows > 0);
-    csv_parce_row(csv->gl_arena, csv->head, mem);
+    csv_parse_row(csv->gl_arena, csv->head, mem);
     // string_println(csv->head[i]);
     return 0;
 }
@@ -162,7 +159,7 @@ void csv_free(CSV *csv){
     free(csv);
 }
 
-u8 *csv_parce_row(ArenaList *arena, sv *csv_row, u8 *mem){
+u8 *csv_parse_row(ArenaList *arena, sv *csv_row, u8 *mem){
     size_t count = 0;
     size_t current_column = 0;
     u8 is_quotes = false; // checking if test in quotations to not split using the ,
@@ -200,7 +197,7 @@ int csv_parse(CSV *csv, u8 *mem){
     csv->data = arenaList_Alloc(csv->gl_arena, sizeof(sv **) * csv->numrows);
     for(size_t i = 0; i < csv->numrows; i++){
         csv->data[i] = arenaList_Alloc(csv->gl_arena, sizeof(sv) * csv->numcols);
-        mem = csv_parce_row(csv->gl_arena, csv->data[i], mem);
+        mem = csv_parse_row(csv->gl_arena, csv->data[i], mem);
         // printf("########## arena_size:%zu max:%zu\n", csv->gl_arena->arena.cur_size, csv->gl_arena->arena.capacity);
         // string_println(csv->data[i][0]);
         // // printf("%s %s\n", mem ,csv->data[i][0].str);
