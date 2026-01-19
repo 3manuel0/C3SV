@@ -9,8 +9,8 @@ C3SV is C library for parsing csv files that I'm working on. I had to start over
 
 ### Goals
 
-- The ability to parce csv and create a csv object.
+- The ability to parse csv as a struct in memory.
 - Have support for most types used in csv (doubles, ints, strings etc...).
 - Printing and formating the file in a human readable way.
-- Change csv object and save it as a file.
+- Change the data in the csv struct and save it as a file.
 - Create a new CSV file from some data.
