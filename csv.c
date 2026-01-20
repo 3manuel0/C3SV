@@ -196,16 +196,22 @@ u8 *csv_parse_row(ArenaList *arena, sv *csv_row, u8 *mem){
 }
 
 int csv_parse(CSV *csv, u8 *mem){
+    // skip the head the first row that has only the names
     while(*(mem++) != '\n');
+
+    // adding types for now we parse all the rows as strings
+    csv->types = arenaList_Alloc(csv->gl_arena, sizeof(data_types *) * csv->numcols);
+    for(size_t i = 0; i < csv->numrows; i++){
+        csv->types[i] = string_;
+    }
+
+    // reading the data
     csv->data = arenaList_Alloc(csv->gl_arena, sizeof(sv **) * csv->numrows);
     for(size_t i = 0; i < csv->numrows; i++){
         csv->data[i] = arenaList_Alloc(csv->gl_arena, sizeof(sv) * csv->numcols);
         mem = csv_parse_row(csv->gl_arena, csv->data[i], mem);
-        // printf("########## arena_size:%zu max:%zu\n", csv->gl_arena->arena.cur_size, csv->gl_arena->arena.capacity);
-        // string_println(csv->data[i][0]);
-        // // printf("%s %s\n", mem ,csv->data[i][0].str);
-        // printf("##########\n");
     }
+    
     return 0;
 }
 
@@ -252,7 +258,7 @@ size_t csv_get_column_index(CSV *csv, sv name, int *is_failed){
     return 0;
 }
 
-// for now this only writes strings 
+// for now this only writes strings no type inference
 void csv_write_file(const char *filename, const CSV *csv){
     assert(csv != NULL && filename != NULL);
     FILE *f = fopen(filename, "wb");
