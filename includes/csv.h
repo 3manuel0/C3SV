@@ -37,6 +37,8 @@ void csv_print_row(sv *row, size_t numcolumns);
 
 void csv_print_column_from_string(CSV *csv, sv column_name);
 
+void csv_write_file(const char *filename, const CSV *csv);
+
 size_t csv_get_column_index(CSV *csv, sv name, int *is_failed);
 
 void print_type(data_types t);

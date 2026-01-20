@@ -14,6 +14,7 @@ int main(){
     printf("numcols: %zu  %zu\n", csv->numcols, csv->numrows);
     sv to_look_for = sv_from_lit("Last Name");
     csv_print_column_from_string(csv , to_look_for);
+    csv_write_file("out.csv", csv);
     csv_free(csv);
     return 0;
 }

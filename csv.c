@@ -1,5 +1,8 @@
 #include "includes/csv.h"
 #include "includes/lib3man.h"
+#include <assert.h>
+#include <stddef.h>
+#include <stdio.h>
 
 // TODO: change from sv to sb, also parse csv with types
 
@@ -51,7 +54,7 @@ CSV *load_csv(char *file_name){
     // printf("%zu\n", csv->numrow);
     csv_parse(csv, csv_mem);
     // printf("string: ");
-    sv_print((string_view *)csv->data[0]);
+    // sv_print((string_view *)csv->data[0]);
     return csv;
 }
 
@@ -130,7 +133,7 @@ void csv_to_memory(u8 *mem, FILE *file, size_t size, size_t *numcolumn, size_t *
 }
 
 CSV *create_csv(){
-    CSV * csv = malloc(sizeof(CSV));
+    CSV *csv = malloc(sizeof(CSV));
     if(csv == NULL) return NULL;
     csv->gl_arena = create_ArenaList(MiB(250));
     if(csv->gl_arena == NULL) return NULL;
@@ -247,4 +250,24 @@ size_t csv_get_column_index(CSV *csv, sv name, int *is_failed){
     }
     *is_failed = true;
     return 0;
+}
+
+// for now this only writes strings 
+void csv_write_file(const char *filename, const CSV *csv){
+    assert(csv != NULL && filename != NULL);
+    FILE *f = fopen(filename, "wb");
+    for(size_t i = 0; i < csv->numcols; i++){
+        fwrite(csv->head[i].str, 1, csv->head[i].len,f);
+        fwrite(",", 1, 1,f);
+    }
+    fwrite("\n", 1, 1, f);
+    for(size_t i = 0; i < csv->numrows; i++){
+
+        for(size_t j = 0; j < csv->numcols; j++){
+            fwrite(((sv **)csv->data)[i][j].str, 1, ((sv **)csv->data)[i][j].len,f);
+            fwrite(",", 1, 1,f);
+        }
+
+        fwrite("\n", 1, 1, f);
+    }
 }
