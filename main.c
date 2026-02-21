@@ -5,7 +5,10 @@
 int main(){
     CSV *csv = load_csv("customers-100.csv");
     // CSV *csv = load_csv("test.csv");
-    if(csv == NULL)return 1;
+    if(csv == NULL){
+        printf("failed to read csv\n");
+        return 1;
+    }
     // free_csv(csv);
     csv_print_head(csv);
     // csv_print_row(csv->data[5], csv->numcols);
@@ -14,7 +17,7 @@ int main(){
     }
     
     printf("numcols: %zu  %zu\n", csv->numcols, csv->numrows);
-    sv to_look_for = sv_from_lit("Last Name");
+    sv to_look_for = sv_from_lit("Phone 2");
     csv_print_column_from_string(csv , to_look_for);
 
     // changing a column name 

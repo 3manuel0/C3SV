@@ -3,18 +3,20 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <string.h>
 #include <assert.h>
 
 typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
+typedef uint64_t u64;
 typedef int8_t i8;
 typedef int16_t i16;
 typedef int32_t i32;
+typedef int64_t i64;
 typedef float f32;
 typedef double f64;
-
 #define false 0
 #define true 1
 
@@ -116,7 +118,15 @@ sv sv_from_cstr(const char *str);// creating a string view from char *
 
 sv sv_from_sb(const sb *sb);// string view from string buffer (a view to that string buffer)
 
+size_t sb_split_svs_char(const sb * sb, char delimiter, sv * sv_arr /* can be NULL*/, size_t sv_arr_len /* can be 0*/);// splits sb into sv_arr (use own array), returns the number of sub string (svs) in that sb
+
 int sv_cmp(const sv *sv1, const sv *sv2); // compare 2 string-views
+
+int sv_to_int64(const sv *sv, i64 *out);// return true if succesful, out is the pointer to which it writes the number
+
+int sv_to_int32(const sv *sv, i32 *out);// return true if succesful, out is the pointer to which it writes the number
+
+int sv_to_float64(const sv *sv, f64 *out);// TODO
 
 void sv_println(const sv *sv); // prints sdtring-view with new line(\n)
 

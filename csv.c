@@ -1,10 +1,7 @@
 #include "includes/csv.h"
 #include "includes/lib3man.h"
-#include <assert.h>
-#include <stddef.h>
-#include <stdio.h>
 
-// TODO: change from sv to sb, also parse csv with types
+// TODO: FINISH LIB3MAN TO PARSE VALUES USING TYPES 
 
 CSV *load_csv(char *file_name){
     FILE * csv_f = fopen(file_name, "r");
@@ -162,7 +159,7 @@ void csv_free(CSV *csv){
     free(csv);
 }
 
-u8 *csv_parse_row(ArenaList *arena, sv *csv_row, u8 *mem){
+u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, u8 *mem){
     size_t count = 0;
     size_t current_column = 0;
     u8 is_quotes = false; // checking if test in quotations to not split using the ,
@@ -215,7 +212,7 @@ int csv_parse(CSV *csv, u8 *mem){
     return 0;
 }
 
-void csv_print_row(sv * row, size_t numcolumn){
+void csv_print_row(string_view * row, size_t numcolumn){
     // fwrite(1, "[ ", 2);
     fwrite("[ ", 1, 2, stdout);
     for(size_t i = 0; i < numcolumn; i++){
@@ -229,7 +226,7 @@ void csv_print_row(sv * row, size_t numcolumn){
     fwrite(" ]\n", 1, 3, stdout);
 }
 
-void csv_print_column_from_string(CSV *csv, sv column_name){
+void csv_print_column_from_string(CSV *csv, string_view column_name){
     int is_failed = 0;
     size_t index = csv_get_column_index(csv, column_name, &is_failed);
     if(is_failed){
@@ -239,7 +236,7 @@ void csv_print_column_from_string(CSV *csv, sv column_name){
     // write(1, "[ ", 2);
     fwrite("[ ", 1, 2, stdout);
     for(size_t i = 0; i < csv->numrows; i++){
-        sv_print(&((sv **)csv->data)[i][index]);
+        sv_print(&((string_view **)csv->data)[i][index]);
         if(i < csv->numrows - 1)
             // write(1, ", ", 2);
             fwrite(", ", 1, 2, stdout);
@@ -248,7 +245,7 @@ void csv_print_column_from_string(CSV *csv, sv column_name){
     fwrite(" ]\n", 1, 3, stdout);
 }
 
-size_t csv_get_column_index(CSV *csv, sv name, int *is_failed){
+size_t csv_get_column_index(CSV *csv, string_view name, int *is_failed){
     for(size_t i = 0; i < csv->numcols; i++){
         if(sv_cmp(&name, &csv->head[i])){
             return i;
