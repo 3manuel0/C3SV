@@ -212,7 +212,7 @@ void csv_print_row(string_view * row, size_t numcolumn){
 
 void csv_print_column_from_string(CSV *csv, string_view column_name){
 
-    size_t index = csv_get_column_index(csv, column_name);
+    ssize_t index = csv_get_column_index(csv, column_name);
     
     if(index < 0){
         fprintf(stderr, "column not found\n");
