@@ -3,6 +3,17 @@
 
 // TODO: FINISH LIB3MAN TO PARSE VALUES USING TYPES 
 
+// ***************************************************************************
+    void csv_to_memory(u8 *mem, FILE *file, size_t size, size_t *numcolumns,
+                    size_t *numrows);
+
+    int csv_parse_head(CSV *csv, u8 *mem);
+
+    u8 *csv_parse_row(ArenaList *arena, sv *csv_row, u8 *mem);
+
+    int csv_parse(CSV *csv, u8 *mem);
+// ****************************************************************************
+
 CSV *load_csv(char *file_name){
     FILE * csv_f = fopen(file_name, "r");
 
@@ -76,33 +87,6 @@ void print_type(data_types t){
         default:
             puts("Uknown type");
             break;
-    }
-}
-
-data_types get_type(char * s){
-    size_t c = 0;
-    i8 is_not_numb = 0;
-    i32 number_of_points = 0; 
-
-    if(s[0] == '-'){
-        c++;
-    }
-
-    while(s[c]){
-        if(s[c] != '.' && (s[c] > '9' || s[c] < '0')){
-            is_not_numb = 1;
-            break;
-        }
-        if(s[c] == '.') number_of_points++;
-        c++;
-    }
-
-    if(number_of_points == 1 && !is_not_numb){
-        return  float64_;
-    }else if(number_of_points == 0 && !is_not_numb){
-        return  int64_;
-    }else{
-        return  string_;
     }
 }
 
@@ -227,9 +211,10 @@ void csv_print_row(string_view * row, size_t numcolumn){
 }
 
 void csv_print_column_from_string(CSV *csv, string_view column_name){
-    int is_failed = 0;
-    size_t index = csv_get_column_index(csv, column_name, &is_failed);
-    if(is_failed){
+
+    size_t index = csv_get_column_index(csv, column_name);
+    
+    if(index < 0){
         fprintf(stderr, "column not found\n");
         return;
     }
@@ -245,14 +230,14 @@ void csv_print_column_from_string(CSV *csv, string_view column_name){
     fwrite(" ]\n", 1, 3, stdout);
 }
 
-size_t csv_get_column_index(CSV *csv, string_view name, int *is_failed){
+ssize_t csv_get_column_index(CSV *csv, string_view name){
     for(size_t i = 0; i < csv->numcols; i++){
         if(sv_cmp(&name, &csv->head[i])){
             return i;
         }
     }
-    *is_failed = true;
-    return 0;
+
+    return -1;
 }
 
 // for now this only writes strings no type inference
