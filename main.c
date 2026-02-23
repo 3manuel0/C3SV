@@ -3,8 +3,8 @@
 #include <stddef.h>
 
 int main(){
-    CSV *csv = load_csv("customers-100.csv");
-    // CSV *csv = load_csv("test.csv");
+    // CSV *csv = load_csv("customers-100.csv");
+    CSV *csv = load_csv("test1.csv");
     if(csv == NULL){
         printf("failed to read csv\n");
         return 1;

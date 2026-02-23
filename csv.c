@@ -9,11 +9,14 @@
 
     int csv_parse_head(CSV *csv, u8 *mem);
 
-    u8 *csv_parse_row(ArenaList *arena, sv *csv_row, u8 *mem);
+    u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, data_types *csv_data, u8 *mem);
+
+    data_types get_type(string_view *sv);
 
     int csv_parse(CSV *csv, u8 *mem);
 // ****************************************************************************
 
+// TODO: ADD TYPES 
 CSV *load_csv(char *file_name){
     FILE * csv_f = fopen(file_name, "r");
 
@@ -73,19 +76,19 @@ void print_type(data_types t){
     // boolean_
     switch ((int)t) {
         case string_:
-            puts("string");
+            fwrite("string\n", 1, 7, stdout);
             break;
         case float64_:
-            puts("float");
+            fwrite("float\n", 1, 6, stdout);
             break;
         case int64_:
-            puts("int");
+            fwrite("integer\n", 1, 8, stdout);
             break;
         case boolean_:
-            puts("boolean");
+            fwrite("boolean\n", 1, 8, stdout);
             break;
         default:
-            puts("Uknown type");
+            fwrite("Uknown type\n", 1, 12, stdout);
             break;
     }
 }
@@ -129,7 +132,7 @@ int csv_parse_head(CSV *csv, u8 *mem){
     csv->head = arenaList_Alloc(csv->gl_arena, sizeof(sv) * csv->numcols);
     printf("numcolumn = %zu | numrow = %zu\n", csv->numcols, csv->numrows);
     assert(csv->numrows > 0);
-    csv_parse_row(csv->gl_arena, csv->head, mem);
+    csv_parse_row(csv->gl_arena, csv->head, NULL,mem);
     // string_println(csv->head[i]);
     return 0;
 }
@@ -143,7 +146,7 @@ void csv_free(CSV *csv){
     free(csv);
 }
 
-u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, u8 *mem){
+u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, data_types *csv_types, u8 *mem){
     size_t count = 0;
     size_t current_column = 0;
     u8 is_quotes = false; // checking if test in quotations to not split using the ,
@@ -160,6 +163,11 @@ u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, u8 *mem){
             csv_row[current_column].str = arenaList_Alloc(arena, count);
             csv_row[current_column].len = count;
             memcpy(csv_row[current_column].str, &mem[i - count], count);
+            // checking types
+            if(csv_types != NULL){
+                if(csv_types[current_column] != string_)
+                    csv_types[current_column] = get_type(&csv_row[current_column]);
+            }
             // string_print(csv_row[current_column]);
             // printf("len: %zu\n", csv_row[current_column].len );
             count = 0;
@@ -172,8 +180,24 @@ u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, u8 *mem){
     csv_row[current_column].str = arenaList_Alloc(arena, count);
     csv_row[current_column].len = count;
     memcpy(csv_row[current_column].str, &mem[i - count], count);
+    // checking types
+    if(csv_types != NULL){
+        if(csv_types[current_column] != string_)
+            csv_types[current_column] = get_type(&csv_row[current_column]);
+    }
     i++;
     return &mem[i];
+}
+
+data_types get_type(string_view *sv){
+    i64 t = 0;
+    // TODO : make sv_to..() able to take a NULL in the out
+    if(sv_to_int64(sv, &t)){
+        return int64_;
+    }else if(sv_to_float64(sv, (f64*)&t)){
+        return float64_;
+    }
+    return string_;
 }
 
 int csv_parse(CSV *csv, u8 *mem){
@@ -182,15 +206,15 @@ int csv_parse(CSV *csv, u8 *mem){
 
     // adding types for now we parse all the rows as strings
     csv->types = arenaList_Alloc(csv->gl_arena, sizeof(data_types *) * csv->numcols);
-    for(size_t i = 0; i < csv->numrows; i++){
-        csv->types[i] = string_;
-    }
+    // for(size_t i = 0; i < csv->numrows; i++){
+    //     csv->types[i] = string_;
+    // }
 
     // reading the data
     csv->data = arenaList_Alloc(csv->gl_arena, sizeof(sv **) * csv->numrows);
     for(size_t i = 0; i < csv->numrows; i++){
         csv->data[i] = arenaList_Alloc(csv->gl_arena, sizeof(sv) * csv->numcols);
-        mem = csv_parse_row(csv->gl_arena, csv->data[i], mem);
+        mem = csv_parse_row(csv->gl_arena, csv->data[i], csv->types, mem);
     }
     
     return 0;
