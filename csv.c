@@ -1,5 +1,6 @@
 #include "includes/csv.h"
 #include "includes/lib3man.h"
+#include <string.h>
 
 // TODO: FINISH LIB3MAN TO PARSE VALUES USING TYPES 
 
@@ -190,11 +191,9 @@ u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, data_types *csv_types,
 }
 
 data_types get_type(string_view *sv){
-    i64 t = 0;
-    // TODO : make sv_to..() able to take a NULL in the out
-    if(sv_to_int64(sv, &t)){
+    if(sv_to_int64(sv, NULL)){
         return int64_;
-    }else if(sv_to_float64(sv, (f64*)&t)){
+    }else if(sv_to_float64(sv, NULL)){
         return float64_;
     }
     return string_;
