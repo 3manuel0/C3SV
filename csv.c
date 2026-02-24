@@ -1,5 +1,7 @@
 #include "includes/csv.h"
 #include "includes/lib3man.h"
+#include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 // TODO: FINISH LIB3MAN TO PARSE VALUES USING TYPES 
@@ -13,6 +15,8 @@
     u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, data_types *csv_data, u8 *mem);
 
     data_types get_type(string_view *sv);
+
+    void csv_parse_with_types(CSV *csv);
 
     int csv_parse(CSV *csv, u8 *mem);
 // ****************************************************************************
@@ -66,6 +70,7 @@ CSV *load_csv(char *file_name){
     // printf("%zu\n", csv->numrow);
     csv_parse(csv, csv_mem);
     // printf("string: ");
+    csv_parse_with_types(csv);
     // sv_print((string_view *)csv->data[0]);
     return csv;
 }
@@ -309,5 +314,38 @@ void csv_write_file(const char *filename, const CSV *csv){
         }
 
         fwrite("\n", 1, 1, f);
+    }
+}
+
+// TODO : FINISH PARSING 
+void csv_parse_with_types(CSV *csv){
+    for(size_t i = 0; i < csv->numrows; i++){
+        for(size_t j = 0; j < csv->numcols; j++){
+            string_view sv = ((string_view **)csv->data)[i][j];
+            switch ((i64)csv->types[j]) {
+                case string_:
+                    printf("string : ");
+                    sv_println(&sv);
+                    break;
+                case int64_: {
+                    i64 t = 0;
+                    sv_to_int64(&sv, &t);
+                    printf("integer : %ld\n", t);
+                    break;
+                }
+                case float64_ : {
+                    f64 t = 0;
+                    sv_to_float64(&sv, &t);
+                    printf("float : %lf\n", t);
+                    break;
+                }
+                case boolean_:
+                    fwrite("boolean\n", 1, 8, stdout);
+                    break;
+                default:
+                    fwrite("Uknown type\n", 1, 12, stdout);
+                    break;
+            }
+        }
     }
 }

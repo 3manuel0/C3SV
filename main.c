@@ -10,11 +10,11 @@ int main(){
         return 1;
     }
     // free_csv(csv);
-    csv_print_head(csv);
+    // csv_print_head(csv);
     // csv_print_row(csv->data[5], csv->numcols);
-    for(size_t i = 0; i < csv->numrows; i++){
-        csv_print_row(csv->data[i], csv->numcols);
-    }
+    // for(size_t i = 0; i < csv->numrows; i++){
+    //     csv_print_row(csv->data[i], csv->numcols);
+    // }
     
     printf("numcols: %zu  %zu\n", csv->numcols, csv->numrows);
     sv to_look_for = sv_from_lit("Phone 2");
