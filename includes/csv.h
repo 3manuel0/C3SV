@@ -22,7 +22,7 @@ void csv_free(CSV *csv);
 
 void csv_print_head(const CSV *csv);
 
-void csv_print_row(const string_view *row, size_t numcolumns);
+void csv_print_row(const void *row, data_types * row_types, size_t numcolumns);
 
 void csv_print_types(const CSV *csv);
 

@@ -1,8 +1,5 @@
 #include "includes/csv.h"
 #include "includes/lib3man.h"
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 
 // TODO: FINISH LIB3MAN TO PARSE VALUES USING TYPES 
 
@@ -144,7 +141,16 @@ int csv_parse_head(CSV *csv, u8 *mem){
 }
 
 void csv_print_head(const CSV *csv){
-    csv_print_row(csv->head, csv->numcols);
+    fwrite("[ ", 1, 2, stdout);
+    for(size_t i = 0; i < csv->numcols; i++){
+        sv_print(&csv->head[i]);
+        if(i < csv->numcols - 1)
+            // write(1, ", ", 2);
+            fwrite(", ", 1, 2, stdout);
+
+    }
+    // fwrite(1, " ]\n", 3);
+    fwrite(" ]\n", 1, 3, stdout);
 }
 
 void csv_free(CSV *csv){
@@ -224,12 +230,27 @@ int csv_parse(CSV *csv, u8 *mem){
     return 0;
 }
 
-void csv_print_row(const string_view * row, size_t numcolumn){
+void csv_print_row(const void *row, data_types *row_types, size_t numcolumns){
     // fwrite(1, "[ ", 2);
     fwrite("[ ", 1, 2, stdout);
-    for(size_t i = 0; i < numcolumn; i++){
-        sv_print(&row[i]);
-        if(i < numcolumn - 1)
+    for(size_t i = 0; i < numcolumns; i++){
+        switch ((i64)row_types[i]) {
+            case string_:
+                sv_print(&((string_view*)row)[i]);
+                break;
+            case int64_: {
+                printf("%ld", ((i64*)row)[i]);
+                break;
+            }
+            case float64_ : {
+                printf("%g", ((f64*)row)[i]);
+                break;
+            }
+            default:
+                fwrite("ERROR TYPE PARSE FAIL", 1, 21, stdout);
+                break;
+        }
+        if(i < numcolumns - 1)
             // write(1, ", ", 2);
             fwrite(", ", 1, 2, stdout);
 
@@ -328,15 +349,13 @@ void csv_parse_with_types(CSV *csv){
                     sv_println(&sv);
                     break;
                 case int64_: {
-                    i64 t = 0;
-                    sv_to_int64(&sv, &t);
-                    printf("integer : %ld\n", t);
+                    sv_to_int64(&sv, &((i64**)csv->data)[i][j]);
+                    printf("integer : %ld\n", ((i64**)csv->data)[i][j]);
                     break;
                 }
                 case float64_ : {
-                    f64 t = 0;
-                    sv_to_float64(&sv, &t);
-                    printf("float : %lf\n", t);
+                    sv_to_float64(&sv, &((f64**)csv->data)[i][j]);
+                    printf("float : %lf\n", ((f64**)csv->data)[i][j]);
                     break;
                 }
                 case boolean_:
