@@ -138,7 +138,7 @@ int csv_parse_head(CSV *csv, u8 *mem){
     return 0;
 }
 
-void csv_print_head(CSV *csv){
+void csv_print_head(const CSV *csv){
     csv_print_row(csv->head, csv->numcols);
 }
 
@@ -219,7 +219,7 @@ int csv_parse(CSV *csv, u8 *mem){
     return 0;
 }
 
-void csv_print_row(string_view * row, size_t numcolumn){
+void csv_print_row(const string_view * row, size_t numcolumn){
     // fwrite(1, "[ ", 2);
     fwrite("[ ", 1, 2, stdout);
     for(size_t i = 0; i < numcolumn; i++){
@@ -233,7 +233,36 @@ void csv_print_row(string_view * row, size_t numcolumn){
     fwrite(" ]\n", 1, 3, stdout);
 }
 
-void csv_print_column_from_string(CSV *csv, string_view column_name){
+void csv_print_types(const CSV *csv){
+    fwrite("[ ", 1, 2, stdout);
+    for(size_t i = 0; i < csv->numcols; i++){
+        switch ((int)csv->types[i]) {
+            case string_:
+                fwrite("string", 1, 7, stdout);
+                break;
+            case float64_:
+                fwrite("float", 1, 6, stdout);
+                break;
+            case int64_:
+                fwrite("integer", 1, 8, stdout);
+                break;
+            case boolean_:
+                fwrite("boolean", 1, 8, stdout);
+                break;
+            default:
+                fwrite("Uknown type", 1, 12, stdout);
+                break;
+        }
+        if(i < csv->numcols - 1)
+            // write(1, ", ", 2);
+            fwrite(", ", 1, 2, stdout);
+
+    }
+    // fwrite(1, " ]\n", 3);
+    fwrite(" ]\n", 1, 3, stdout);
+}
+
+void csv_print_column_from_string(const CSV *csv, string_view column_name){
 
     ssize_t index = csv_get_column_index(csv, column_name);
     
@@ -253,7 +282,7 @@ void csv_print_column_from_string(CSV *csv, string_view column_name){
     fwrite(" ]\n", 1, 3, stdout);
 }
 
-ssize_t csv_get_column_index(CSV *csv, string_view name){
+ssize_t csv_get_column_index(const CSV *csv, string_view name){
     for(size_t i = 0; i < csv->numcols; i++){
         if(sv_cmp(&name, &csv->head[i])){
             return i;

@@ -20,15 +20,17 @@ CSV *create_csv();
 
 void csv_free(CSV *csv);
 
-void csv_print_head(CSV *csv);
+void csv_print_head(const CSV *csv);
 
-void csv_print_row(string_view *row, size_t numcolumns);
+void csv_print_row(const string_view *row, size_t numcolumns);
 
-void csv_print_column_from_string(CSV *csv, string_view column_name);
+void csv_print_types(const CSV *csv);
+
+void csv_print_column_from_string(const CSV *csv, string_view column_name);
 
 void csv_write_file(const char *filename, const CSV *csv);
 
-ssize_t csv_get_column_index(CSV *csv, string_view name); // returns -1 if it fails
+ssize_t csv_get_column_index(const CSV *csv, string_view name); // returns -1 if it fails
 
 void print_type(data_types t);
 

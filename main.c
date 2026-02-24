@@ -3,8 +3,8 @@
 #include <stddef.h>
 
 int main(){
-    // CSV *csv = load_csv("customers-100.csv");
-    CSV *csv = load_csv("test1.csv");
+    CSV *csv = load_csv("customers-100.csv");
+    // CSV *csv = load_csv("test1.csv");
     if(csv == NULL){
         printf("failed to read csv\n");
         return 1;
@@ -28,8 +28,7 @@ int main(){
     csv_write_file("out.csv", csv);
 
     // writing all the types
-    for(size_t i = 0; i < csv->numcols; i++)
-        print_type(csv->types[i]);
+    csv_print_types(csv);
 
     csv_free(csv);
     return 0;
