@@ -14,7 +14,7 @@ typedef struct {
   ArenaList *gl_arena_head;
 } CSV;
 
-CSV *load_csv(char *file_name);
+CSV *load_csv(char *file_name);// load with types (only int and float 64bit)
 
 CSV *create_csv();
 

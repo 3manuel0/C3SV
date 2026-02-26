@@ -1,5 +1,6 @@
 #include "includes/csv.h"
 #include "includes/lib3man.h"
+#include <stdio.h>
 
 // TODO: FINISH LIB3MAN TO PARSE VALUES USING TYPES 
 
@@ -129,7 +130,6 @@ CSV *create_csv(){
     csv->gl_arena_head = csv->gl_arena;
     return csv;
 }
-
 
 int csv_parse_head(CSV *csv, u8 *mem){
     csv->head = arenaList_Alloc(csv->gl_arena, sizeof(sv) * csv->numcols);
@@ -324,14 +324,32 @@ void csv_write_file(const char *filename, const CSV *csv){
     FILE *f = fopen(filename, "wb");
     for(size_t i = 0; i < csv->numcols; i++){
         fwrite(csv->head[i].str, 1, csv->head[i].len,f);
-        fwrite(",", 1, 1,f);
+        if(i < csv->numcols - 1)
+            fwrite(",", 1, 1,f);
     }
     fwrite("\n", 1, 1, f);
     for(size_t i = 0; i < csv->numrows; i++){
 
         for(size_t j = 0; j < csv->numcols; j++){
-            fwrite(((sv **)csv->data)[i][j].str, 1, ((sv **)csv->data)[i][j].len,f);
-            fwrite(",", 1, 1,f);
+            switch ((int)csv->types[j]) {
+                case string_:
+                    fwrite(((sv **)csv->data)[i][j].str, 1, ((sv **)csv->data)[i][j].len,f);
+                    break;
+                case float64_:
+                    fprintf(f, "%g", ((f64**)csv->data)[i][j]);
+                    break;
+                case int64_:
+                    fprintf(f, "%ld", ((i64**)csv->data)[i][j]);
+                    break;
+                case boolean_:
+                    fprintf(f, "%s", ((int**)csv->data)[i][j] ? "True" : "False");
+                    break;
+                default:
+                    fwrite("Uknown type", 1, 12, stdout);
+                    break;
+            }
+            if(j < csv->numcols - 1)
+                fwrite(",", 1, 1,f);
         }
 
         fwrite("\n", 1, 1, f);

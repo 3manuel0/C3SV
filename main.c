@@ -18,16 +18,17 @@ int main(){
     }
     
     printf("numcols: %zu  %zu\n", csv->numcols, csv->numrows);
-    sv to_look_for = sv_from_lit("Phone 2");
+    string_view to_look_for = sv_from_lit("Phone 2");
     csv_print_column_from_string(csv , to_look_for);
 
     // changing a column name 
-    // sv t = sv_from_lit("Testing");
-    // csv->head[2] = t;
+    sv t = sv_from_lit("Testing");
+    csv->head[2] = t;
 
+    ((f64**)csv->data)[0][2] = 15.0;
     // TODO: add typing to writing csv
-    // // writing the file
-    // // csv_write_file("out.csv", csv);
+    // writing the file
+    csv_write_file("out.csv", csv);
 
     // writing all the types
     csv_print_types(csv);

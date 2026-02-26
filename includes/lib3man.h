@@ -125,7 +125,7 @@ int sv_to_int64(const sv *sv, i64 *out);// return true if succesful, out is the 
 
 int sv_to_int32(const sv *sv, i32 *out);// return true if succesful, out is the pointer to which it writes the number
 
-int sv_to_float64(const sv *sv, f64 *out);// TODO
+int sv_to_float64(const sv *sv, f64 *out);
 
 void sv_println(const sv *sv); // prints sdtring-view with new line(\n)
 
