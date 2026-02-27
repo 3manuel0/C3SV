@@ -32,7 +32,7 @@ int main(){
 
     // writing all the types
     csv_print_types(csv);
-
+    printf("%zu", (i64)csv_sum_column(csv, sv_from_lit("index")));
     csv_free(csv);
     return 0;
 }

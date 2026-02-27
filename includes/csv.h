@@ -2,6 +2,13 @@
 #define CSV_H
 #include "lib3man.h"
 
+#ifdef _WIN32
+    #include <BaseTsd.h>
+    typedef SSIZE_T ssize_t;
+#else
+    #include <unistd.h>
+#endif
+
 typedef enum { string_ = 1, float64_, int64_, boolean_ } data_types;
 
 typedef struct {
@@ -29,6 +36,8 @@ void csv_print_types(const CSV *csv);
 void csv_print_column_from_string(const CSV *csv, string_view column_name);
 
 void csv_write_file(const char *filename, const CSV *csv);
+
+f64 csv_sum_column(CSV *csv, string_view column_name);
 
 ssize_t csv_get_column_index(const CSV *csv, string_view name); // returns -1 if it fails
 

@@ -386,3 +386,29 @@ void csv_parse_with_types(CSV *csv){
         }
     }
 }
+
+f64 csv_sum_column(CSV *csv, string_view column_name){
+    ssize_t index = csv_get_column_index(csv, column_name);
+    if(index < 0){
+        fprintf(stderr, "column not found\n");
+        return 0.0;
+    }
+    if(csv->types[index] == float64_){
+        f64 temp = 0.0;
+        f64 ** col = (f64**)csv->data;
+        for(size_t i = 0; i < csv->numrows; i++){
+            temp+= col[i][index];
+        }
+        return temp;
+    }
+    else if(csv->types[index] == int64_){
+        i64 temp = 0;
+        i64 ** col = (i64**)csv->data;
+        for(size_t i = 0; i < csv->numrows; i++){
+            temp+= col[i][index];
+        }
+        return temp;
+    }
+    fprintf(stderr, "column can't be summed\n");
+    return 0.0;
+}
