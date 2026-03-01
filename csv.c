@@ -363,17 +363,17 @@ void csv_parse_with_types(CSV *csv){
             string_view sv = ((string_view **)csv->data)[i][j];
             switch ((i64)csv->types[j]) {
                 case string_:
-                    printf("string : ");
+                    // printf("string : ");
                     sv_println(&sv);
                     break;
                 case int64_: {
                     sv_to_int64(&sv, &((i64**)csv->data)[i][j]);
-                    printf("integer : %ld\n", ((i64**)csv->data)[i][j]);
+                    // printf("integer : %ld\n", ((i64**)csv->data)[i][j]);
                     break;
                 }
                 case float64_ : {
                     sv_to_float64(&sv, &((f64**)csv->data)[i][j]);
-                    printf("float : %lf\n", ((f64**)csv->data)[i][j]);
+                    // printf("float : %lf\n", ((f64**)csv->data)[i][j]);
                     break;
                 }
                 case boolean_:
