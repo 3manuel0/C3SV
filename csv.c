@@ -12,7 +12,7 @@
 
     u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, data_types *csv_data, u8 *mem);
 
-    data_types get_type(string_view *sv);
+    data_types get_type(string_view *sv, data_types t);
 
     void csv_parse_with_types(CSV *csv);
 
@@ -178,7 +178,7 @@ u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, data_types *csv_types,
             // checking types
             if(csv_types != NULL){
                 if(csv_types[current_column] != string_)
-                    csv_types[current_column] = get_type(&csv_row[current_column]);
+                    csv_types[current_column] = get_type(&csv_row[current_column], csv_types[current_column]);
             }
             // string_print(csv_row[current_column]);
             // printf("len: %zu\n", csv_row[current_column].len );
@@ -195,13 +195,14 @@ u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, data_types *csv_types,
     // checking types
     if(csv_types != NULL){
         if(csv_types[current_column] != string_)
-            csv_types[current_column] = get_type(&csv_row[current_column]);
+            csv_types[current_column] = get_type(&csv_row[current_column], csv_types[current_column]);
     }
     i++;
     return &mem[i];
 }
 
-data_types get_type(string_view *sv){
+data_types get_type(string_view *sv, data_types t){
+
     if(sv_to_int64(sv, NULL)){
         return int64_;
     }else if(sv_to_float64(sv, NULL)){
