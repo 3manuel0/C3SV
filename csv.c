@@ -202,13 +202,19 @@ u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, data_types *csv_types,
 }
 
 data_types get_type(string_view *sv, data_types t){
-
-    if(sv_to_int64(sv, NULL)){
-        return int64_;
-    }else if(sv_to_float64(sv, NULL)){
-        return float64_;
+    if(t == float64_){
+        if(sv_to_float64(sv, NULL)){
+            return float64_;
+        }
+        return string_; 
+    }else{
+        if(sv_to_int64(sv, NULL)){
+            return int64_;
+        }else if(sv_to_float64(sv, NULL)){
+            return float64_;
+        }
+        return string_;  
     }
-    return string_;
 }
 
 int csv_parse(CSV *csv, u8 *mem){
