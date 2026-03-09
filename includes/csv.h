@@ -39,6 +39,8 @@ void csv_write_file(const char *filename, const CSV *csv);
 
 ssize_t csv_get_column_index(const CSV *csv, string_view name); // returns -1 if it fails
 
+i32 csv_write_json(const CSV *csv, const char *filename);
+
 void print_type(data_types t);
 
 #endif

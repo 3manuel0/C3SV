@@ -394,6 +394,52 @@ void csv_parse_with_types(CSV *csv){
     }
 }
 
+
+i32 csv_write_json(const CSV *csv, const char *filename){
+    assert(csv != NULL && filename != NULL);
+    FILE *f = fopen(filename, "wb");
+    fprintf(f, "[\n");
+    fwrite("\n", 1, 1, f);
+    for(size_t i = 0; i < csv->numrows; i++){
+        fwrite("{\n", 1, 2,f);
+        for(size_t j = 0; j < csv->numcols; j++){
+            switch ((int)csv->types[j]) {
+                case string_:
+                    fwrite("\"", 1, 1,f);
+                    fwrite(csv->head[j].str, 1, csv->head[j].len,f);
+                    fwrite("\"", 1, 1,f);
+                    fwrite(": ", 1, 2,f);
+                    fwrite(((sv **)csv->data)[i][j].str, 1, ((sv **)csv->data)[i][j].len,f);
+                    break;
+                case float64_:
+                    fwrite("\"", 1, 1,f);
+                    fwrite(csv->head[j].str, 1, csv->head[j].len,f);
+                    fwrite("\"", 1, 1,f);
+                    fprintf(f, ": %g", ((f64**)csv->data)[i][j]);
+                    break;
+                case int64_:
+                    fwrite("\"", 1, 1,f);
+                    fwrite(csv->head[j].str, 1, csv->head[j].len,f);
+                    fwrite("\"", 1, 1,f);
+                    fprintf(f, ": %ld", ((i64**)csv->data)[i][j]);
+                    break;
+                case boolean_:
+                    fprintf(f, "%s", ((int**)csv->data)[i][j] ? "True" : "False");
+                    break;
+                default:
+                    fwrite("Uknown type", 1, 12, f);
+                    break;
+            }
+            if(j < csv->numcols - 1)
+                fwrite(",\n", 1, 2, f);
+        }
+        fwrite("}", 1, 1,f);
+        if(i < csv->numrows - 1)
+            fwrite(",\n", 1, 2, f);
+    }
+    fwrite("\n]", 1, 2, f);
+    return 1;
+}
 // f64 csv_sum_column(CSV *csv, string_view column_name){
 //     ssize_t index = csv_get_column_index(csv, column_name);
 //     if(index < 0){

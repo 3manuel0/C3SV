@@ -29,7 +29,7 @@ int main(){
     // TODO: add typing to writing csv
     // writing the file
     csv_write_file("out.csv", csv);
-
+    csv_write_json(csv, "test.json");
     // writing all the types
     csv_print_types(csv);
 
