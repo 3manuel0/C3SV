@@ -18,6 +18,7 @@ C3SV is C library for parsing csv files that I'm working on. I had to start over
 ### Current Progress
 
 - Load csv into a struct in memory (CSV).
+- Supports "value, with comma" inside a column.
 - Automatic type inference (only int64, float64 and string_view).
 - Parsing values into native C types (only int64, float64, string_view).
 - Write a csv struct into a csv file.
