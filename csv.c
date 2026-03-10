@@ -16,6 +16,8 @@
 
     void csv_parse_with_types(CSV *csv);
 
+    void sv_write_j(const sv *sv, FILE *f);
+
     int csv_parse(CSV *csv, u8 *mem);
 // ****************************************************************************
 
@@ -395,34 +397,31 @@ void csv_parse_with_types(CSV *csv){
 }
 
 
-// TODO : FINISH THE FORMATING 
+// TODO : FIX THE FORMATTING AND USE LESS CODE
 i32 csv_write_json(const CSV *csv, const char *filename){
     assert(csv != NULL && filename != NULL);
     FILE *f = fopen(filename, "wb");
-    fprintf(f, "[\n");
+    fprintf(f, "[");
     fwrite("\n", 1, 1, f);
     for(size_t i = 0; i < csv->numrows; i++){
-        fwrite("{\n", 1, 2,f);
+        fwrite("\t{\n", 1, 3,f);
         for(size_t j = 0; j < csv->numcols; j++){
             switch ((int)csv->types[j]) {
                 case string_:
-                    fwrite("\"", 1, 1,f);
-                    sv_writef(&csv->head[j], f);
-                    fwrite("\"", 1, 1,f);
+                    fwrite("\t\t", 1, 2, f);
+                    sv_write_j(&csv->head[j], f);
                     fwrite(": ", 1, 2,f);
                     // fwrite(((sv **)csv->data)[i][j].str, 1, ((sv **)csv->data)[i][j].len,f);
-                    sv_writef(&((sv **)csv->data)[i][j], f);
+                    sv_write_j(&((sv **)csv->data)[i][j], f);
                     break;
                 case float64_:
-                    fwrite("\"", 1, 1,f);
-                    sv_writef(&csv->head[j], f);
-                    fwrite("\"", 1, 1,f);
+                    fwrite("\t\t", 1, 2, f);
+                    sv_write_j(&csv->head[j], f);
                     fprintf(f, ": %g", ((f64**)csv->data)[i][j]);
                     break;
                 case int64_:
-                    fwrite("\"", 1, 1,f);
-                    sv_writef(&csv->head[j], f);
-                    fwrite("\"", 1, 1,f);
+                    fwrite("\t\t", 1, 2, f);
+                    sv_write_j(&csv->head[j], f);
                     fprintf(f, ": %ld", ((i64**)csv->data)[i][j]);
                     break;
                 case boolean_:
@@ -435,13 +434,24 @@ i32 csv_write_json(const CSV *csv, const char *filename){
             if(j < csv->numcols - 1)
                 fwrite(",\n", 1, 2, f);
         }
-        fwrite("}", 1, 1,f);
+        fwrite("\n\t}", 1, 3,f);
         if(i < csv->numrows - 1)
             fwrite(",\n", 1, 2, f);
     }
     fwrite("\n]", 1, 2, f);
     return 1;
 }
+
+void sv_write_j(const string_view *sv, FILE *f){
+    if(sv->str[0] == '"'){
+        sv_writef(sv, f);
+        return;
+    }
+    fwrite("\"", 1, 1,f);
+    sv_writef(sv, f);
+    fwrite("\"", 1, 1,f);
+}
+
 // f64 csv_sum_column(CSV *csv, string_view column_name){
 //     ssize_t index = csv_get_column_index(csv, column_name);
 //     if(index < 0){

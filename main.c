@@ -1,6 +1,5 @@
 #include "includes/csv.h"
 #include "includes/lib3man.h"
-#include <stddef.h>
 
 int main(){
     // CSV *csv = load_csv("customers-100.csv");
