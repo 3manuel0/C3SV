@@ -395,6 +395,7 @@ void csv_parse_with_types(CSV *csv){
 }
 
 
+// TODO : FINISH THE FORMATING 
 i32 csv_write_json(const CSV *csv, const char *filename){
     assert(csv != NULL && filename != NULL);
     FILE *f = fopen(filename, "wb");
@@ -406,20 +407,21 @@ i32 csv_write_json(const CSV *csv, const char *filename){
             switch ((int)csv->types[j]) {
                 case string_:
                     fwrite("\"", 1, 1,f);
-                    fwrite(csv->head[j].str, 1, csv->head[j].len,f);
+                    sv_writef(&csv->head[j], f);
                     fwrite("\"", 1, 1,f);
                     fwrite(": ", 1, 2,f);
-                    fwrite(((sv **)csv->data)[i][j].str, 1, ((sv **)csv->data)[i][j].len,f);
+                    // fwrite(((sv **)csv->data)[i][j].str, 1, ((sv **)csv->data)[i][j].len,f);
+                    sv_writef(&((sv **)csv->data)[i][j], f);
                     break;
                 case float64_:
                     fwrite("\"", 1, 1,f);
-                    fwrite(csv->head[j].str, 1, csv->head[j].len,f);
+                    sv_writef(&csv->head[j], f);
                     fwrite("\"", 1, 1,f);
                     fprintf(f, ": %g", ((f64**)csv->data)[i][j]);
                     break;
                 case int64_:
                     fwrite("\"", 1, 1,f);
-                    fwrite(csv->head[j].str, 1, csv->head[j].len,f);
+                    sv_writef(&csv->head[j], f);
                     fwrite("\"", 1, 1,f);
                     fprintf(f, ": %ld", ((i64**)csv->data)[i][j]);
                     break;
