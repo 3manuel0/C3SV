@@ -1,8 +1,7 @@
 #include "includes/csv.h"
 #include "includes/lib3man.h"
-#include <stdio.h>
 
-// TODO: FINISH LIB3MAN TO PARSE VALUES USING TYPES 
+// TODO: ADD OTHER SUPPORT FOR OTHER TYPES 
 
 // ***************************************************************************
     void csv_to_memory(u8 *mem, FILE *file, size_t size, size_t *numcolumns,
@@ -20,8 +19,7 @@
 
     int csv_parse(CSV *csv, u8 *mem);
 // ****************************************************************************
-
-// TODO: ADD TYPES 
+ 
 CSV *load_csv(char *file_name){
     FILE * csv_f = fopen(file_name, "r");
 
@@ -273,19 +271,24 @@ void csv_print_types(const CSV *csv){
     for(size_t i = 0; i < csv->numcols; i++){
         switch ((int)csv->types[i]) {
             case string_:
-                fwrite("string", 1, 7, stdout);
+                sv_print(&csv->head[i]);
+                fwrite(": string", 1, 8, stdout);
                 break;
             case float64_:
-                fwrite("float", 1, 6, stdout);
+                sv_print(&csv->head[i]);
+                fwrite(": float64", 1, 9, stdout);
                 break;
             case int64_:
-                fwrite("integer", 1, 8, stdout);
+                sv_print(&csv->head[i]);
+                fwrite(": int64", 1, 7, stdout);
                 break;
             case boolean_:
-                fwrite("boolean", 1, 8, stdout);
+                sv_print(&csv->head[i]);
+                fwrite(": bool", 1, 6, stdout);
                 break;
             default:
-                fwrite("Uknown type", 1, 12, stdout);
+                sv_print(&csv->head[i]);
+                fwrite("NULL", 1, 4, stdout);
                 break;
         }
         if(i < csv->numcols - 1)
