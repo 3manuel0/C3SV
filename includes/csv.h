@@ -1,6 +1,7 @@
 #ifndef CSV_H
 #define CSV_H
 #include "lib3man.h"
+#include <stddef.h>
 
 #ifdef _WIN32
     #include <BaseTsd.h>
@@ -40,6 +41,10 @@ void csv_write_file(const char *filename, const CSV *csv);
 ssize_t csv_get_column_index(const CSV *csv, string_view name); // returns -1 if it fails
 
 i32 csv_write_json(const CSV *csv, const char *filename);
+
+i64 csv_get_int_by_name(const CSV *csv, size_t row, string_view col_name);
+
+f64 csv_get_float_by_name(const CSV *csv,size_t row, string_view col_name);
 
 void print_type(data_types t);
 

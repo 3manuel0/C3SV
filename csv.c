@@ -1,5 +1,8 @@
 #include "includes/csv.h"
 #include "includes/lib3man.h"
+#include <assert.h>
+#include <stddef.h>
+#include <stdio.h>
 
 // TODO: ADD OTHER SUPPORT FOR OTHER TYPES 
 
@@ -16,6 +19,8 @@
     void csv_parse_with_types(CSV *csv);
 
     void sv_write_j(const sv *sv, FILE *f);
+
+    void *csv_get_cell(const CSV *csv, size_t row, size_t col);
 
     int csv_parse(CSV *csv, u8 *mem);
 // ****************************************************************************
@@ -453,6 +458,33 @@ void sv_write_j(const string_view *sv, FILE *f){
     fwrite("\"", 1, 1,f);
     sv_writef(sv, f);
     fwrite("\"", 1, 1,f);
+}
+
+// TODO : TESTING
+i64 csv_get_int_by_name(const CSV *csv, size_t row, string_view col_name){
+    assert(csv != NULL);
+    assert(col_name.str != NULL && col_name.len > 0);
+    ssize_t col_index = csv_get_column_index(csv, col_name);
+    if(col_index == -1){
+        fprintf(stderr, "column not found!\n");
+        return 0;
+    }
+    return *((i64 *)csv_get_cell(csv, row, col_index));
+}
+
+f64 csv_get_float_by_name(const CSV *csv, size_t row, string_view col_name){
+    assert(csv != NULL);
+    assert(col_name.str != NULL && col_name.len > 0);
+    ssize_t col_index = csv_get_column_index(csv, col_name);
+    if(col_index == -1){
+        fprintf(stderr, "column not found!\n");
+        return 0.0;
+    }
+    return *((f64 *)csv_get_cell(csv, row, col_index));
+}
+
+void *csv_get_cell(const CSV *csv, size_t row, size_t col){
+    return &((void **)csv->data[row])[col];
 }
 
 // f64 csv_sum_column(CSV *csv, string_view column_name){

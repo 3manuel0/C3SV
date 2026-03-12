@@ -1,5 +1,6 @@
 #include "includes/csv.h"
 #include "includes/lib3man.h"
+#include <stdio.h>
 
 int main(){
     // CSV *csv = load_csv("customers-100.csv");
@@ -31,7 +32,8 @@ int main(){
     csv_write_json(csv, "test.json");
     // writing all the types
     csv_print_types(csv);
-
+    printf("i64 : %ld\n", csv_get_int_by_name(csv, 0, sv_from_lit("x")));
+    printf("f64 : %lf\n", csv_get_float_by_name(csv, 0, sv_from_lit("x")));
     csv_free(csv);
     return 0;
 }
