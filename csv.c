@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <unistd.h>
 
 // TODO: ADD OTHER SUPPORT FOR OTHER TYPES 
 
@@ -307,16 +308,16 @@ void csv_print_types(const CSV *csv){
 
 void csv_print_column_from_string(const CSV *csv, string_view column_name){
 
-    ssize_t index = csv_get_column_index(csv, column_name);
+    ssize_t col_index = csv_get_column_index(csv, column_name);
     
-    if(index < 0){
+    if(col_index == -1){
         fprintf(stderr, "column not found\n");
         return;
     }
     // write(1, "[ ", 2);
     fwrite("[ ", 1, 2, stdout);
     for(size_t i = 0; i < csv->numrows; i++){
-        sv_print(&((string_view **)csv->data)[i][index]);
+        sv_print(&((string_view **)csv->data)[i][col_index]);
         if(i < csv->numrows - 1)
             // write(1, ", ", 2);
             fwrite(", ", 1, 2, stdout);
@@ -481,6 +482,17 @@ f64 csv_get_float_by_name(const CSV *csv, size_t row, string_view col_name){
         return 0.0;
     }
     return *((f64 *)csv_get_cell(csv, row, col_index));
+}
+
+string_view csv_get_sv_by_name(const CSV *csv, size_t row, string_view col_name){
+    assert(csv != NULL);
+    assert(col_name.str != NULL && col_name.len > 0);
+    ssize_t col_index = csv_get_column_index(csv, col_name);
+    if(col_index == -1){
+        fprintf(stderr, "column not found!\n");
+        return (sv){NULL, 0};
+    }
+    return *((sv *)csv_get_cell(csv, row, col_index));
 }
 
 void *csv_get_cell(const CSV *csv, size_t row, size_t col){
