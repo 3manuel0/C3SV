@@ -22,9 +22,9 @@ typedef struct {
   ArenaList *gl_arena_head;
 } CSV;
 
-CSV *load_csv(char *file_name);// load with types (only int and float 64bit)
-
 CSV *create_csv(); // creates an empty csv struct in memory
+
+CSV *load_csv(char *file_name);// load with types (only int and float 64bit)
 
 void csv_free(CSV *csv); // free csv in memory
 
@@ -47,6 +47,12 @@ i64 csv_get_int_by_name(const CSV *csv, size_t row, string_view col_name);
 f64 csv_get_float_by_name(const CSV *csv,size_t row, string_view col_name);
 
 string_view csv_get_sv_by_name(const CSV *csv, size_t row, string_view col_name);
+
+size_t csv_row_count(const CSV *csv);
+
+size_t csv_column_count(const CSV *csv);
+
+const string_view csv_column_name(const CSV* csv, size_t column);
 
 void print_type(data_types t);
 

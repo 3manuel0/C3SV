@@ -499,6 +499,26 @@ void *csv_get_cell(const CSV *csv, size_t row, size_t col){
     return &((void **)csv->data[row])[col];
 }
 
+
+// TODO: TEST THESE FUNCTIONS 
+size_t csv_row_count(const CSV *csv){
+    assert(csv != NULL);
+    return csv->numrows;
+}
+
+size_t csv_column_count(const CSV *csv){
+    assert(csv != NULL);
+    return csv->numcols;
+}
+
+const string_view csv_column_name(const CSV *csv, size_t column){
+    assert(csv != NULL);
+    if(column >= csv->numcols){
+        return (sv){.str = NULL, .len = 0};
+    }
+    return csv->head[column];
+}
+
 // f64 csv_sum_column(CSV *csv, string_view column_name){
 //     ssize_t index = csv_get_column_index(csv, column_name);
 //     if(index < 0){
