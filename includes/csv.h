@@ -52,6 +52,12 @@ int64_t csv_column_sum_int(const CSV* csv, size_t col_index);
 
 f64 csv_column_sum_float(const CSV* csv, size_t col_index);
 
+f64 csv_column_mean(const CSV* csv, size_t col_index);
+
+f64 csv_column_min(const CSV* csv, size_t col_index);
+
+f64 csv_column_max(const CSV* csv, size_t col_index);
+
 size_t csv_row_count(const CSV *csv);
 
 size_t csv_column_count(const CSV *csv);

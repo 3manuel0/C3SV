@@ -520,8 +520,9 @@ string_view csv_column_name(const CSV *csv, size_t column){
     return csv->head[column];
 }
 
+// TODO: TEST THESE LAST FUNCTIONS :
 int64_t csv_column_sum_int(const CSV* csv, size_t col_index){
-    assert(col_index > 0 && col_index < csv->numcols);
+    assert(col_index < csv->numcols);
     if(csv->types[col_index] == int64_){
         i64 temp = 0;
         i64 ** col = (i64**)csv->data;
@@ -538,12 +539,12 @@ int64_t csv_column_sum_int(const CSV* csv, size_t col_index){
         }
         return temp;
     }
-    fprintf(stderr, "column can't be summed\n");
+    fprintf(stderr, "column not of type float or int\n");
     return 0;
 }
 
 f64 csv_column_sum_float(const CSV* csv, size_t col_index){
-    assert(col_index > 0 && col_index < csv->numcols);
+    assert(col_index < csv->numcols);
     if(csv->types[col_index] == float64_){
         f64 temp = 0.0;
         f64 ** col = (f64**)csv->data;
@@ -560,11 +561,64 @@ f64 csv_column_sum_float(const CSV* csv, size_t col_index){
         }
         return temp;
     }
-    fprintf(stderr, "column can't be summed\n");
+    fprintf(stderr, "column not of type float or int\n");
     return 0.0;
 }
 
+f64 csv_column_mean(const CSV* csv, size_t col_index){
+    f64 tmp = csv_column_sum_float(csv, col_index);
+    return tmp / (f64)csv->numrows;
+}
 
+f64 csv_column_min(const CSV* csv, size_t col_index){
+    if(csv->types[col_index] == float64_){
+        f64 **col = ((f64**)csv->data);
+        f64 min = col[0][col_index];
+        for(size_t i = 1; i < csv->numrows; i++){
+            if(min > col[i][col_index]){
+                min = col[i][col_index];
+            }
+        }
+        return min;
+    }
+    else if(csv->types[col_index] == int64_){
+        i64 **col = ((i64**)csv->data);
+        f64 min = (f64)col[0][col_index];
+        for(size_t i = 1; i < csv->numrows; i++){
+            if(min > (f64)col[i][col_index]){
+                min = (f64)col[i][col_index];
+            }
+        }
+        return min;
+    }
+    fprintf(stderr, "column not of type float or int\n");
+    return 0.0;
+}
+
+f64 csv_column_max(const CSV* csv, size_t col_index){
+    if(csv->types[col_index] == float64_){
+        f64 **col = ((f64**)csv->data);
+        f64 max = col[0][col_index];
+        for(size_t i = 1; i < csv->numrows; i++){
+            if(max < col[i][col_index]){
+                max = col[i][col_index];
+            }
+        }
+        return max;
+    }
+    else if(csv->types[col_index] == float64_){
+        i64 **col = ((i64**)csv->data);
+        f64 max = (f64)col[0][col_index];
+        for(size_t i = 1; i < csv->numrows; i++){
+            if(max < (f64)col[i][col_index]){
+                max = (f64)col[i][col_index];
+            }
+        }
+        return max;
+    }
+    fprintf(stderr, "column not of type float or int\n");
+    return 0.0;
+}
 
 // f64 csv_sum_column(CSV *csv, string_view column_name){
 //     ssize_t index = csv_get_column_index(csv, column_name);
