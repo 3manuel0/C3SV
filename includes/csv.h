@@ -48,11 +48,15 @@ f64 csv_get_float_by_name(const CSV *csv,size_t row, string_view col_name);
 
 string_view csv_get_sv_by_name(const CSV *csv, size_t row, string_view col_name);
 
+int64_t csv_column_sum_int(const CSV* csv, size_t col_index);
+
+f64 csv_column_sum_float(const CSV* csv, size_t col_index);
+
 size_t csv_row_count(const CSV *csv);
 
 size_t csv_column_count(const CSV *csv);
 
-const string_view csv_column_name(const CSV* csv, size_t column);
+string_view csv_column_name(const CSV* csv, size_t column);
 
 void print_type(data_types t);
 

@@ -511,13 +511,60 @@ size_t csv_column_count(const CSV *csv){
     return csv->numcols;
 }
 
-const string_view csv_column_name(const CSV *csv, size_t column){
+string_view csv_column_name(const CSV *csv, size_t column){
     assert(csv != NULL);
     if(column >= csv->numcols){
+        fprintf(stderr, "column not found!\n");
         return (sv){.str = NULL, .len = 0};
     }
     return csv->head[column];
 }
+
+int64_t csv_column_sum_int(const CSV* csv, size_t col_index){
+    assert(col_index > 0 && col_index < csv->numcols);
+    if(csv->types[col_index] == int64_){
+        i64 temp = 0;
+        i64 ** col = (i64**)csv->data;
+        for(size_t i = 0; i < csv->numrows; i++){
+            temp+= col[i][col_index];
+        }
+        return temp;
+    }
+    else if(csv->types[col_index] == int64_){
+        i64 temp = 0;
+        f64 ** col = (f64**)csv->data;
+        for(size_t i = 0; i < csv->numrows; i++){
+            temp+= col[i][col_index];
+        }
+        return temp;
+    }
+    fprintf(stderr, "column can't be summed\n");
+    return 0;
+}
+
+f64 csv_column_sum_float(const CSV* csv, size_t col_index){
+    assert(col_index > 0 && col_index < csv->numcols);
+    if(csv->types[col_index] == float64_){
+        f64 temp = 0.0;
+        f64 ** col = (f64**)csv->data;
+        for(size_t i = 0; i < csv->numrows; i++){
+            temp+= col[i][col_index];
+        }
+        return temp;
+    }
+    else if(csv->types[col_index] == int64_){
+        i64 temp = 0;
+        i64 ** col = (i64**)csv->data;
+        for(size_t i = 0; i < csv->numrows; i++){
+            temp+= col[i][col_index];
+        }
+        return temp;
+    }
+    fprintf(stderr, "column can't be summed\n");
+    return 0.0;
+}
+
+
 
 // f64 csv_sum_column(CSV *csv, string_view column_name){
 //     ssize_t index = csv_get_column_index(csv, column_name);
