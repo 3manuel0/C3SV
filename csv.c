@@ -13,9 +13,9 @@
 
     int csv_parse_head(CSV *csv, u8 *mem);
 
-    u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, data_types *csv_data, u8 *mem);
+    u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, csv_type *csv_data, u8 *mem);
 
-    data_types get_type(string_view *sv, data_types t);
+    csv_type get_type(string_view *sv, csv_type t);
 
     void csv_parse_with_types(CSV *csv);
 
@@ -79,7 +79,7 @@ CSV *load_csv(char *file_name){
     return csv;
 }
 
-void print_type(data_types t){
+void print_type(csv_type t){
     // str_,
     // float_,
     // int_,
@@ -164,7 +164,7 @@ void csv_free(CSV *csv){
     free(csv);
 }
 
-u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, data_types *csv_types, u8 *mem){
+u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, csv_type *csv_types, u8 *mem){
     size_t count = 0;
     size_t current_column = 0;
     u8 is_quotes = false; // checking if test in quotations to not split using the ,
@@ -207,7 +207,7 @@ u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, data_types *csv_types,
     return &mem[i];
 }
 
-data_types get_type(string_view *sv, data_types t){
+csv_type get_type(string_view *sv, csv_type t){
     if(t == float64_){
         if(sv_to_float64(sv, NULL)){
             return float64_;
@@ -228,7 +228,7 @@ int csv_parse(CSV *csv, u8 *mem){
     while(*(mem++) != '\n');
 
     // adding types for now we parse all the rows as strings
-    csv->types = arenaList_Alloc(csv->gl_arena, sizeof(data_types *) * csv->numcols);
+    csv->types = arenaList_Alloc(csv->gl_arena, sizeof(csv_type *) * csv->numcols);
     // for(size_t i = 0; i < csv->numrows; i++){
     //     csv->types[i] = string_;
     // }
@@ -243,7 +243,7 @@ int csv_parse(CSV *csv, u8 *mem){
     return 0;
 }
 
-void csv_print_row(const void *row, data_types *row_types, size_t numcolumns){
+void csv_print_row(const void *row, csv_type *row_types, size_t numcolumns){
     // fwrite(1, "[ ", 2);
     fwrite("[ ", 1, 2, stdout);
     for(size_t i = 0; i < numcolumns; i++){

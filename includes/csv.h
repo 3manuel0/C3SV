@@ -10,11 +10,11 @@
     #include <unistd.h>
 #endif
 
-typedef enum { string_ = 1, float64_, int64_, boolean_ } data_types;
+typedef enum { string_ = 1, float64_, int64_, boolean_ } csv_type;
 
 typedef struct {
   string_view *head;
-  data_types *types;
+  csv_type *types;
   void **data; // maybe void * is better for infering the types later
   size_t numrows;
   size_t numcols;
@@ -30,7 +30,7 @@ void csv_free(CSV *csv); // free csv in memory
 
 void csv_print_head(const CSV *csv);// prints head
 
-void csv_print_row(const void *row, data_types * row_types, size_t numcolumns);
+void csv_print_row(const void *row, csv_type * row_types, size_t numcolumns);
 
 void csv_print_types(const CSV *csv);
 
@@ -64,6 +64,6 @@ size_t csv_column_count(const CSV *csv);
 
 string_view csv_column_name(const CSV* csv, size_t column);
 
-void print_type(data_types t);
+void print_type(csv_type t);
 
 #endif
