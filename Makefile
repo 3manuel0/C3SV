@@ -6,15 +6,19 @@ OBJS = main.o csv.o
 
 CFLAGS = -Wall -std=c99 -Wextra -Werror
 
-Links = -Llib -l3man
+Links = -Llib -l3man -lc3sv
 
-all: $(TARGET)
+SRC := src/csv.c
+OBJ := $(SRC:.c=.o)
+LIB := lib/lc3sv.a
+
+all: $(LIB) $(TARGET)
+
+$(LIB): $(OBJ)
+	$(AR) $(ARFLAGS) $@ $^
 
 $(TARGET): $(OBJS)
 	$(CC) $(OBJS) -o $(TARGET) $(Links)
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
 clean:
-	rm -f *.o
+	rm -f src/*.o

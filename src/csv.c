@@ -1,5 +1,5 @@
-#include "includes/csv.h"
-#include "includes/lib3man.h"
+#include "../includes/csv.h"
+#include "../includes/lib3man.h"
 
 // TODO: ADD OTHER SUPPORT FOR OTHER TYPES 
 
