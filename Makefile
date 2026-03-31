@@ -1,24 +1,24 @@
 CC = gcc
-
 TARGET = csv
-
-OBJS = main.o csv.o
-
 CFLAGS = -Wall -std=c99 -Wextra -Werror
 
-Links = -Llib -l3man -lc3sv
+Links = -L./lib -lc3sv -l3man
 
 SRC := src/csv.c
 OBJ := $(SRC:.c=.o)
-LIB := lib/lc3sv.a
+LIB := lib/libc3sv.a
 
 all: $(LIB) $(TARGET)
 
-$(LIB): $(OBJ)
-	$(AR) $(ARFLAGS) $@ $^
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-$(TARGET): $(OBJS)
-	$(CC) $(OBJS) -o $(TARGET) $(Links)
+$(LIB): $(OBJ)
+	@mkdir -p lib
+	$(AR) rcs $@ $^
+
+$(TARGET): main.o $(LIB)
+	$(CC) main.o -o $(TARGET) $(Links)
 
 clean:
-	rm -f src/*.o
+	rm -f src/*.o *.o $(TARGET) lib/libc3sv.a
