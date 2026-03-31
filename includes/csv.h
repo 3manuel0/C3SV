@@ -19,7 +19,6 @@ typedef struct {
   size_t numrows;
   size_t numcols;
   ArenaList *gl_arena;
-  ArenaList *gl_arena_head;
 } CSV;
 
 CSV *create_csv(); // creates an empty csv struct in memory

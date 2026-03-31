@@ -9,7 +9,6 @@ int main(){
         printf("failed to read csv\n");
         return 1;
     }
-    // free_csv(csv);
 
     csv_print_head(csv);
     // csv_print_row(csv->data[5], csv->numcols);

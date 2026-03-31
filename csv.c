@@ -1,9 +1,5 @@
 #include "includes/csv.h"
 #include "includes/lib3man.h"
-#include <assert.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <unistd.h>
 
 // TODO: ADD OTHER SUPPORT FOR OTHER TYPES 
 
@@ -133,12 +129,11 @@ CSV *create_csv(){
     if(csv->gl_arena == NULL) return NULL;
     if(csv->gl_arena->arena.memory == NULL) return NULL;
     csv->gl_arena->next = NULL;
-    csv->gl_arena_head = csv->gl_arena;
     return csv;
 }
 
 int csv_parse_head(CSV *csv, u8 *mem){
-    csv->head = arenaList_Alloc(csv->gl_arena, sizeof(sv) * csv->numcols);
+    csv->head = arenaList_Alloc(&csv->gl_arena, sizeof(sv) * csv->numcols);
     printf("numcolumn = %zu | numrow = %zu\n", csv->numcols, csv->numrows);
     assert(csv->numrows > 0);
     csv_parse_row(csv->gl_arena, csv->head, NULL,mem);
@@ -160,7 +155,7 @@ void csv_print_head(const CSV *csv){
 }
 
 void csv_free(CSV *csv){
-    arenaList_free(csv->gl_arena_head);
+    arenaList_free(csv->gl_arena);
     free(csv);
 }
 
@@ -178,7 +173,7 @@ u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, csv_type *csv_types, u
         if(mem[i] == ',' && !is_quotes){
             // printf("%c %zu %c\n" , mem[i], count, mem[i - count]);
             // csv->head[current_column] = arenaList_Alloc(arenas, sizeof(string));
-            csv_row[current_column].str = arenaList_Alloc(arena, count);
+            csv_row[current_column].str = arenaList_Alloc(&arena, count);
             csv_row[current_column].len = count;
             memcpy(csv_row[current_column].str, &mem[i - count], count);
             // checking types
@@ -195,7 +190,7 @@ u8 *csv_parse_row(ArenaList *arena, string_view *csv_row, csv_type *csv_types, u
         }
     }
     // add the last column that's before the \n
-    csv_row[current_column].str = arenaList_Alloc(arena, count);
+    csv_row[current_column].str = arenaList_Alloc(&arena, count);
     csv_row[current_column].len = count;
     memcpy(csv_row[current_column].str, &mem[i - count], count);
     // checking types
@@ -228,15 +223,15 @@ int csv_parse(CSV *csv, u8 *mem){
     while(*(mem++) != '\n');
 
     // adding types for now we parse all the rows as strings
-    csv->types = arenaList_Alloc(csv->gl_arena, sizeof(csv_type *) * csv->numcols);
+    csv->types = arenaList_Alloc(&csv->gl_arena, sizeof(csv_type *) * csv->numcols);
     // for(size_t i = 0; i < csv->numrows; i++){
     //     csv->types[i] = string_;
     // }
 
     // reading the data
-    csv->data = arenaList_Alloc(csv->gl_arena, sizeof(sv **) * csv->numrows);
+    csv->data = arenaList_Alloc(&csv->gl_arena, sizeof(sv **) * csv->numrows);
     for(size_t i = 0; i < csv->numrows; i++){
-        csv->data[i] = arenaList_Alloc(csv->gl_arena, sizeof(sv) * csv->numcols);
+        csv->data[i] = arenaList_Alloc(&csv->gl_arena, sizeof(sv) * csv->numcols);
         mem = csv_parse_row(csv->gl_arena, csv->data[i], csv->types, mem);
     }
     
@@ -382,7 +377,7 @@ void csv_parse_with_types(CSV *csv){
             switch ((i64)csv->types[j]) {
                 case string_:
                     // printf("string : ");
-                    sv_println(&sv);
+                    // sv_println(&sv);
                     break;
                 case int64_: {
                     sv_to_int64(&sv, &((i64**)csv->data)[i][j]);
@@ -453,11 +448,11 @@ i32 csv_write_json(const CSV *csv, const char *filename){
 
 void sv_write_j(const string_view *sv, FILE *f){
     if(sv->str[0] == '"'){
-        sv_writef(sv, f);
+        sv_fwrite(sv, f);
         return;
     }
     fwrite("\"", 1, 1,f);
-    sv_writef(sv, f);
+    sv_fwrite(sv, f);
     fwrite("\"", 1, 1,f);
 }
 
@@ -520,7 +515,8 @@ string_view csv_column_name(const CSV *csv, size_t column){
     return csv->head[column];
 }
 
-// TODO: TEST THESE LAST FUNCTIONS :
+// TODO: TEST THESE STATISTIC FUNCTIONS :
+// STATISTIC FUNCTIONS 
 int64_t csv_column_sum_int(const CSV* csv, size_t col_index){
     assert(col_index < csv->numcols);
     if(csv->types[col_index] == int64_){
