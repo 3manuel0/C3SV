@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 int main(){
-    CSV *csv = load_csv("customers-100.csv");
+    CSV *csv = load_csv("test1.csv");
     // CSV *csv = load_csv("test1.csv");
     if(csv == NULL){
         printf("failed to read csv\n");
@@ -17,7 +17,7 @@ int main(){
     }
     
     printf("numcols: %zu  %zu\n", csv->numcols, csv->numrows);
-    string_view to_look_for = sv_from_lit("Customer Id");
+    string_view to_look_for = sv_from_lit("Last Name");
     csv_print_column_from_string(csv , to_look_for);
 
     // changing a column name 
