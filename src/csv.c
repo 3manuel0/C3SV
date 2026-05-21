@@ -144,7 +144,7 @@ int csv_parse_head(CSV *csv, u8 *mem){
 void csv_print_head(const CSV *csv){
     fwrite("[ ", 1, 2, stdout);
     for(size_t i = 0; i < csv->numcols; i++){
-        sv_print(&csv->head[i]);
+        sv_print(csv->head[i]);
         if(i < csv->numcols - 1)
             // write(1, ", ", 2);
             fwrite(", ", 1, 2, stdout);
@@ -244,7 +244,7 @@ void csv_print_row(const void *row, csv_type *row_types, size_t numcolumns){
     for(size_t i = 0; i < numcolumns; i++){
         switch ((i64)row_types[i]) {
             case string_:
-                sv_print(&((string_view*)row)[i]);
+                sv_print(((string_view*)row)[i]);
                 break;
             case int64_: {
                 printf("%ld", ((i64*)row)[i]);
@@ -272,23 +272,23 @@ void csv_print_types(const CSV *csv){
     for(size_t i = 0; i < csv->numcols; i++){
         switch ((int)csv->types[i]) {
             case string_:
-                sv_print(&csv->head[i]);
+                sv_print(csv->head[i]);
                 fwrite(": string", 1, 8, stdout);
                 break;
             case float64_:
-                sv_print(&csv->head[i]);
+                sv_print(csv->head[i]);
                 fwrite(": float64", 1, 9, stdout);
                 break;
             case int64_:
-                sv_print(&csv->head[i]);
+                sv_print(csv->head[i]);
                 fwrite(": int64", 1, 7, stdout);
                 break;
             case boolean_:
-                sv_print(&csv->head[i]);
+                sv_print(csv->head[i]);
                 fwrite(": bool", 1, 6, stdout);
                 break;
             default:
-                sv_print(&csv->head[i]);
+                sv_print(csv->head[i]);
                 fwrite("NULL", 1, 4, stdout);
                 break;
         }
@@ -312,7 +312,7 @@ void csv_print_column_from_string(const CSV *csv, string_view column_name){
     // write(1, "[ ", 2);
     fwrite("[ ", 1, 2, stdout);
     for(size_t i = 0; i < csv->numrows; i++){
-        sv_print(&((string_view **)csv->data)[i][col_index]);
+        sv_print(((string_view **)csv->data)[i][col_index]);
         if(i < csv->numrows - 1)
             // write(1, ", ", 2);
             fwrite(", ", 1, 2, stdout);
@@ -448,11 +448,11 @@ i32 csv_write_json(const CSV *csv, const char *filename){
 
 void sv_write_j(const string_view *sv, FILE *f){
     if(sv->str[0] == '"'){
-        sv_fwrite(sv, f);
+        sv_fwrite(*sv, f);
         return;
     }
     fwrite("\"", 1, 1,f);
-    sv_fwrite(sv, f);
+    sv_fwrite(*sv, f);
     fwrite("\"", 1, 1,f);
 }
 

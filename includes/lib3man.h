@@ -1,5 +1,6 @@
 #ifndef LIB_3MAN
 #define LIB_3MAN
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,6 +10,7 @@
 typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
+typedef uint64_t u64;
 typedef int8_t i8;
 typedef int16_t i16;
 typedef int32_t i32;
@@ -79,70 +81,147 @@ enum { str_fail = -1, str_succ, str_err };
 
 #define sv_from_lit(str) (sv){str, sizeof(str) - 1}
 
-// TODO FIX SB AND SV FUNCTIONS, THERE ARE BUGS 
 // string-view functions ###############################################
-sv sv_from_cstr_sz(const char *str, size_t size);// creating a string view from char * + size
+string_view sv_from_cstr_sz(const char *str, size_t size);// creating a string view from char * + size
 
-sv sv_from_cstr(const char *str);// creating a string view from char *
+string_view sv_from_cstr(const char *str);// creating a string view from char *
 
-sv sv_from_sb(const sb *sb);// string view from string buffer (a view to that string buffer)
+string_view sv_from_sb(const string_buffer *sb);// string view from string buffer (a view to that string buffer)
 
-size_t sb_split_svs_char(const sb * sb, char delimiter, sv * sv_arr /* can be NULL*/, size_t sv_arr_len /* can be 0*/);// splits sb into sv_arr (use own array), returns the number of sub string (svs) in that sb
+size_t sb_split_svs_char(const string_buffer * sb, char delimiter, string_view * sv_arr /* can be NULL*/, size_t sv_arr_len /* can be 0*/);// splits sb into sv_arr (use own array), returns the number of sub string (svs) in that sb
 
-int sv_cmp(const sv *sv1, const sv *sv2); // compare 2 string-views
+int sv_cmp(const string_view *sv1, const string_view *sv2); // compare 2 string-views returns 0 if not equal and 1 if they are equal
 
-int sv_to_int64(const sv *sv, i64 *out);// return true if succesful, out is the pointer to which it writes the number
+int sv_to_int64(const string_view *sv, i64 *out);// return true (1) if succesful else false (0), out is the pointer to which it writes the parsed number
 
-int sv_to_int32(const sv *sv, i32 *out);// return true if succesful, out is the pointer to which it writes the number
+int sv_to_int32(const string_view *sv, i32 *out);// return true (1) if succesful else false (0), out is the pointer to which it writes the parsed number
 
-int sv_to_float64(const sv *sv, f64 *out);// TODO : MORE TESTS 
+int sv_to_float64(const string_view *sv, f64 *out);// return true (1) if succesful else false (0), out is the pointer to which it writes the parsed number 
 
-void sv_println(const sv *sv); // prints sdtring-view with new line(\n)
+void sv_println(string_view sv); // prints string-view's string with new line(\n) at the end of it
 
-void sv_print(const sv *sv); // prints sdtring-view  without new line
+void sv_print(string_view sv); // prints the sdtring-view's string
 
-void sv_fwrite(const sv *sv, FILE *file); // wirtes sv to a file (also stdout/stderr)
+void sv_fwrite(string_view sv, FILE *file); // wirtes sdtring-view to a file stream 
+// string_buffer functions ###########################################################string_buffer create_sb_empty(size_t cap);
 
-// string_buffer functions ###########################################################
-sb create_sb_empty(size_t cap);
+string_buffer create_sb_empty(size_t cap);
 
-sb sb_from_cstr(const char *str);// creating a string-buffer from char *
+string_buffer sb_from_cstr(const char *str);// creating a string-buffer from char *
 
-sb create_sb_inside_arenaList(ArenaList **arenaList, size_t cap);
+string_buffer create_sb_inside_arenaList(ArenaList **arenaList, size_t cap);
 
-sb sb_arenaList_from_cstr_sz(ArenaList **arenaList, const char *str, size_t size); // creating a string-buffer from char * with it's size inside an areanaList
+string_buffer sb_arenaList_from_cstr_sz(ArenaList **arenaList, const char *str, size_t size); // creating a string-buffer from char * with it's size inside an areanaList
 
-int sb_arenaList_push_cstr_sz(ArenaList **arenaList, sb *sb, const char *str, size_t size);
+int sb_arenaList_push_cstr_sz(ArenaList **arenaList, string_buffer *sb, const char *str, size_t size);
 
-int sb_arenaList_push_sv(ArenaList **arenaList, sb *sb, sv sv);
+int sb_arenaList_push_sv(ArenaList **arenaList, string_buffer *sb, string_view sv);
 
-int sb_cat(sb *dest, sb *src); // concatanate two string-buffers in the heap
+int sb_cat(string_buffer *dest, string_buffer *src); // concatanate two string-buffers in the heap
 
-sb sb_from_sv(const sv *sv); // creates a string-buffer from a string view in the heap
+string_buffer sb_from_sv(const string_view *sv); // creates a string-buffer from a string view in the heap
 
-int sb_push_sv(sb *sb, const sv *sv); // append (push) a string-view inside a string-buffer
+int sb_push_sv(string_buffer *sb, const string_view *sv); // append (push) a string-view inside a string-buffer
 
-int sb_push_cstr(sb *sb, const char *str);// append (push) a char * inside a string-buffer
+int sb_push_cstr(string_buffer *sb, const char *str);// append (push) a char * inside a string-buffer
 
-int sb_push_cstr_sz(sb *sb, const char *str, size_t size);// append (push) a char * (with its size) inside a string-buffer
+int sb_push_cstr_sz(string_buffer *sb, const char *str, size_t size);// append (push) a char * (with its size) inside a string-buffer
 
-int sb_push_char(sb *sb, char ch);// append (push) a charachter inside a string-buffer
+int sb_push_char(string_buffer *sb, char ch);// append (push) a charachter inside a string-buffer
 
-char * cstr_from_sb(const sb *sb);// char * with /0 at the end from string_buffer
+char * cstr_from_sb(const string_buffer *sb);// char * with /0 at the end from string_buffer
 
-int sb_readLine(sb *sb, FILE *stream);
+int sb_cmp(string_buffer sb1, string_buffer sb2); // compare 2 string_buffers returns 1 (true) they are equals, else returns 0 (false)
 
-int sb_fread_all(sb *sb, FILE *stream);
+int sb_freadln(string_buffer *sb, FILE *stream);// reads a line from a file stream
 
-void sb_println(const sb *sb); // prints a string-buffer (current used bytes (chars)) with new line(\n)
+int sb_fread_all(string_buffer *sb, FILE *stream);// reads everything from a file stream (stops at EOF)
 
-void sb_print(const sb *sb); // prints a string-buffer without new line
+void sb_println(string_buffer sb); // prints a string-buffer's string (current used bytes (chars)) with new line(\n) at the end
 
-int sb_fprint(const sb *sb, FILE *stream);// prints sb to file, it returns len else -1
+void sb_print(string_buffer sb); // prints a string-buffer's string
 
-void sb_fwrite(const sb *sb, FILE *stream);// wirtes sb to a file or stdout/stderr
+int sb_fprint(string_buffer sb, FILE *stream);// prints sb to file stream, it returns len else -1
 
-void sb_free(sb *sb); // frees string-buffer in the heap
+void sb_fwrite(string_buffer sb, FILE *stream);// wirtes sb to a file stream
+
+void sb_free(string_buffer *sb); // frees string-buffer (for the heap one not the arena one)
 // ###########################################################################################
 
+//############ Utility #######################################################################
+#ifdef _WIN32
+  #include <windows.h>
+  #include <bcrypt.h>
+  #pragma comment(lib, "bcrypt.lib")
+
+#elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+  #include <stdlib.h> // arc4random_buf
+
+#else
+  #include <sys/random.h>
+#endif
+
+typedef struct{
+  u8 * buf;
+  size_t size;
+} Buffer;
+
+u32 u32_entropy_random(void);//os based unsigned 32bit integer pseudo-random entropy generator
+
+f64 f64_random_range(f64 min, f64 max);// return float 64bit (double) based on a range [min, max]
+
+f32 f32_random_range(f32 min, f32 max);// return float 32bit (float) based on a range [min, max]
+
+u32 u32_random_range(u32 min, u32 max);// return unsigned integer 32bit based on a range [min, max]
+
+u16 u16_bswap(u16 x);//swaping bits (Endianess) 16bit
+
+u32 u32_bswap(u32 x);//swaping bits (Endianess) 32bit
+
+u64 u64_bswap(u64 x);//swaping bits (Endianess) 64bit
+
+Buffer buffer_read_file(const char * file);
+
+ssize_t buffer_write_file(Buffer buffer, const char * file_name);
+
+void buffer_free(Buffer *buffer);
+// ###########################################################################################
+
+//############ Matrix #######################################################################
+typedef struct Matrix{
+    f64    *mtx;
+    size_t rows;
+    size_t cols;
+}Matrix;
+
+// TODO : I NEED TO FINISH THESE MATRIX FUNCTIONS
+Matrix matrix_create_empty(size_t rows, size_t cols);// creates a matrix full of zeros
+
+Matrix matrix_create(size_t rows, size_t cols, f64 arr[rows][cols]);// creates a matrix from a 2d array
+
+int matrix_fill(Matrix *matrix, f64 value);// fills the matrix with the value given
+
+void matrix_randomize(Matrix* matrix, f64 min, f64 max);// fills the matrix with random numbers between min and max both includes
+
+void matrix_add(Matrix *a, Matrix b);// addes matrix b to a
+
+void matrix_sub(Matrix *a, Matrix b);// subtructs matrix b from a 
+
+void matrix_mul(Matrix *a, Matrix b);// multiplaying a by b and storing the result in a
+
+Matrix matrix_dot(Matrix a, Matrix b);// returns a matrix which is the result of matrix a multiplied by matrix b
+
+void matrix_scale(Matrix *matrix, f64 k);// multiplies each element in the matrix with the value k
+
+Matrix matrix_copy(Matrix src);// creates a copy of a matrix (must be freed)
+
+void matrix_map(Matrix *matrix, f64(*func)(f64));// does the function func for every elemnt of the matrix
+
+Matrix matrix_transpose(Matrix matrix);// matrix transpose (fliping rows with columns) M[R x C] -> M[C x R]
+
+void matrix_print(Matrix matrix);// prints the matrix
+
+void matrix_free(Matrix *matrix);// free memory
+
+// ######################################################################################################################
 #endif
